@@ -1,185 +1,154 @@
 package org.example.AI;
 
+import org.example.AI.search.AlphaBeta;
+import org.example.AI.search.MoveSorter;
+import org.example.AI.search.TimeOutException;
 import org.example.chess.*;
 
-import java.util.List;
+import java.util.*;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * <p>
- * {@code RechercheMinimaxAlphaBeta} choisit un coup avec l'algorithme
- * <b>Minimax + Alpha-Bêta</b>.
- * </p>
- *
- * <p>
- * Idée très simple :
- * </p>
- * <ul>
- *   <li>Les Blancs veulent un score le plus grand possible (MAX).</li>
- *   <li>Les Noirs veulent un score le plus petit possible (MIN).</li>
- * </ul>
- *
- * <p>
- * Alpha-Bêta sert à couper des branches inutiles et donc aller plus vite,
- * ce qui est très important car le facteur de branchement des échecs est grand.
- * </p>
- *
- * <p>
- * Convention : {@link Evaluation#evaluer(Plateau)} donne un score
- * du point de vue des Blancs.</p>
+ * Recherche avec Iterative Deepening Search (IDS), et limite de temps.
+ * Orchestre multithreading et délégue un thread de temps et le Minimax à
+ * AlphaBeta.
  */
 public final class RechercheMinimaxAlphaBeta {
 
-    /**
-     * <p>
-     * Trouve le meilleur coup pour le joueur au trait.
-     * </p>
-     *
-     * <p>
-     * Si c'est aux Blancs de jouer : on choisit le coup qui maximise le score.
-     * </p>
-     * <p>
-     * Si c'est aux Noirs de jouer : on choisit le coup qui minimise le score.
-     * </p>
-     *
-     * @param plateau position courante
-     * @param niveau niveau de difficulté
-     * @return meilleur coup (ou {@code null} si aucun coup légal)
-     */
-    public static Coup meilleurCoup(Plateau plateau, Niveau niveau) {
-        if (plateau == null) throw new IllegalArgumentException("plateau null");
-        if (niveau == null) throw new IllegalArgumentException("niveau null");
+    private static final int NUM_THREADS = Runtime.getRuntime().availableProcessors();
+    private static final ExecutorService pool = Executors.newFixedThreadPool(NUM_THREADS, r -> {
+        Thread t = new Thread(r);
+        t.setDaemon(true);
+        return t;
+    });
+
+    private RechercheMinimaxAlphaBeta() {
+    }
+
+    public static Coup meilleurCoup(Plateau plateau, Niveau niveau, org.example.gui.ProfilerPartie profiler) {
+        if (plateau == null)
+            throw new IllegalArgumentException("plateau null");
+        if (niveau == null)
+            throw new IllegalArgumentException("niveau null");
 
         List<Coup> coups = GenerateurCoups.genererLegaux(plateau);
-        if (coups.isEmpty()) {
-            return null; // mat ou pat
-        }
+        if (coups.isEmpty())
+            return null;
+
+        long tempsMaxMs = switch (niveau) {
+            case FACILE -> 1000L;
+            case MOYEN -> 2500L;
+            case DIFFICILE -> 5000L;
+        };
+
+        long startTime = System.currentTimeMillis();
+        AtomicBoolean timeIsUp = new AtomicBoolean(false);
 
         boolean blancsJouent = (plateau.trait() == Couleur.BLANC);
 
-        int alpha = -Evaluation.SCORE_MAT;
-        int beta = Evaluation.SCORE_MAT;
+        MoveSorter.trierCoups(coups, plateau);
 
-        Coup meilleur = null;
+        Coup meilleurGlobal = coups.get(0);
+        int profondeurAtteinte = 1;
 
-        // Blanc = MAX, Noir = MIN
-        int meilleurScore = blancsJouent ? Integer.MIN_VALUE : Integer.MAX_VALUE;
+        ScheduledExecutorService timer = Executors.newSingleThreadScheduledExecutor();
+        timer.schedule(() -> timeIsUp.set(true), tempsMaxMs, TimeUnit.MILLISECONDS);
 
-        for (Coup coup : coups) {
-            EtatPlateau s = plateau.jouerAvecSauvegarde(coup);
+        for (int depth = 1; depth <= 30; depth++) {
+            if (timeIsUp.get())
+                break;
 
-            int score = minimax(plateau, niveau.profondeur() - 1, alpha, beta);
+            try {
+                MoveSorter.placerEnPremier(coups, meilleurGlobal);
 
-            plateau.annuler(s);
-
-            if (blancsJouent) {
-                // MAX
-                if (score > meilleurScore) {
-                    meilleurScore = score;
-                    meilleur = coup;
+                List<Future<MoveScore>> futures = new ArrayList<>();
+                final int currentDepth = depth;
+                for (Coup coup : coups) {
+                    Callable<MoveScore> task = () -> {
+                        Plateau copie = plateau.copie();
+                        copie.jouerAvecSauvegarde(coup);
+                        int alpha = -Evaluation.SCORE_MAT;
+                        int beta = Evaluation.SCORE_MAT;
+                        int eval = AlphaBeta.minimax(copie, currentDepth - 1, alpha, beta, timeIsUp);
+                        return new MoveScore(coup, eval);
+                    };
+                    futures.add(pool.submit(task));
                 }
-                alpha = Math.max(alpha, meilleurScore);
-            } else {
-                // MIN
-                if (score < meilleurScore) {
-                    meilleurScore = score;
-                    meilleur = coup;
-                }
-                beta = Math.min(beta, meilleurScore);
-            }
 
-            // Coupe à la racine aussi
-            if (alpha >= beta) {
+                int bestScoreIter = blancsJouent ? Integer.MIN_VALUE : Integer.MAX_VALUE;
+                Coup meilleurIter = null;
+                boolean searchAborted = false;
+
+                for (Future<MoveScore> future : futures) {
+                    try {
+                        MoveScore res = future.get();
+                        if (blancsJouent) {
+                            if (res.score > bestScoreIter) {
+                                bestScoreIter = res.score;
+                                meilleurIter = res.coup;
+                            }
+                        } else {
+                            if (res.score < bestScoreIter) {
+                                bestScoreIter = res.score;
+                                meilleurIter = res.coup;
+                            }
+                        }
+                    } catch (ExecutionException e) {
+                        if (e.getCause() instanceof TimeOutException) {
+                            searchAborted = true;
+                        }
+                    } catch (InterruptedException e) {
+                        searchAborted = true;
+                    }
+                }
+
+                for (Future<MoveScore> future : futures) {
+                    future.cancel(true);
+                }
+
+                if (!searchAborted && !timeIsUp.get() && meilleurIter != null) {
+                    meilleurGlobal = meilleurIter;
+                    profondeurAtteinte = depth;
+
+                    if (Math.abs(bestScoreIter) >= Evaluation.SCORE_MAT - 100) {
+                        break;
+                    }
+                } else {
+                    break;
+                }
+
+            } catch (Exception e) {
                 break;
             }
         }
 
-        return meilleur;
+        timer.shutdownNow();
+
+        long tempsTotal = System.currentTimeMillis() - startTime;
+        if (profiler != null) {
+            profiler.enregistrerCoup(blancsJouent, tempsTotal, profondeurAtteinte);
+        }
+
+        System.out.println(
+                "IA (" + niveau + ") a joué " + meilleurGlobal.depart().versAlgebrique() + "-"
+                        + meilleurGlobal.arrivee().versAlgebrique()
+                        + " (Prof: " + profondeurAtteinte + ", Temps: " + tempsTotal + "ms)");
+
+        return meilleurGlobal;
     }
 
-    /**
-     * <p>
-     * Minimax + Alpha-Bêta.
-     * </p>
-     *
-     * <p>
-     * Rappel :
-     * </p>
-     * <ul>
-     *   <li>Si c'est au Blanc de jouer : on renvoie le MAX des scores enfants.</li>
-     *   <li>Si c'est au Noir de jouer : on renvoie le MIN des scores enfants.</li>
-     * </ul>
-     *
-     * @param plateau position courante
-     * @param profondeur profondeur restante
-     * @param alpha borne basse (meilleur déjà trouvé pour MAX)
-     * @param beta borne haute (meilleur déjà trouvé pour MIN)
-     * @return score minimax de la position
-     */
-    private static int minimax(Plateau plateau, int profondeur, int alpha, int beta) {
-        if (profondeur == 0) {
-            return Evaluation.evaluer(plateau); // score côté Blanc
-        }
+    public static Coup meilleurCoup(Plateau plateau, Niveau niveau) {
+        return meilleurCoup(plateau, niveau, null);
+    }
 
-        List<Coup> coups = GenerateurCoups.genererLegaux(plateau);
+    private static class MoveScore {
+        Coup coup;
+        int score;
 
-        // Terminal : plus de coups légaux => mat ou pat
-        if (coups.isEmpty()) {
-            boolean enEchec = plateau.estEnEchec(plateau.trait());
-            if (enEchec) {
-                // Le joueur au trait est mat.
-                // Si Blanc est mat => très mauvais pour Blanc.
-                // Si Noir est mat => très bon pour Blanc.
-                // On préfère mater plus vite : petit ajustement avec profondeur.
-                if (plateau.trait() == Couleur.BLANC) {
-                    return -Evaluation.SCORE_MAT + (10 - profondeur);
-                } else {
-                    return Evaluation.SCORE_MAT - (10 - profondeur);
-                }
-            }
-            // Pat
-            return 0;
-        }
-
-        boolean max = (plateau.trait() == Couleur.BLANC);
-
-        if (max) {
-            int meilleur = Integer.MIN_VALUE;
-
-            for (Coup coup : coups) {
-                EtatPlateau s = plateau.jouerAvecSauvegarde(coup);
-
-                int score = minimax(plateau, profondeur - 1, alpha, beta);
-
-                plateau.annuler(s);
-
-                meilleur = Math.max(meilleur, score);
-                alpha = Math.max(alpha, meilleur);
-
-                if (alpha >= beta) {
-                    break; // coupe
-                }
-            }
-
-            return meilleur;
-        } else {
-            int meilleur = Integer.MAX_VALUE;
-
-            for (Coup coup : coups) {
-                EtatPlateau s = plateau.jouerAvecSauvegarde(coup);
-
-                int score = minimax(plateau, profondeur - 1, alpha, beta);
-
-                plateau.annuler(s);
-
-                meilleur = Math.min(meilleur, score);
-                beta = Math.min(beta, meilleur);
-
-                if (alpha >= beta) {
-                    break; // coupe
-                }
-            }
-
-            return meilleur;
+        MoveScore(Coup c, int s) {
+            coup = c;
+            score = s;
         }
     }
 }

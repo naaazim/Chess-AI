@@ -31,7 +31,7 @@ public class MainFX extends Application {
         root.setAlignment(Pos.CENTER);
 
         Label lblTitre = new Label("Configuration de la partie");
-        lblTitre.setStyle("-fx-font-size: 20px; -fx-font-weight: bold;");
+        lblTitre.getStyleClass().add("title-label");
 
         // Mode de jeu
         Label lblMode = new Label("Mode de jeu :");
@@ -96,7 +96,22 @@ public class MainFX extends Application {
                 lblNiveauBlanc, comboNiveauBlanc, lblNiveauNoir, comboNiveauNoir,
                 btnLancer);
 
-        Scene scene = new Scene(root, 400, 500);
+        // ============================================
+        // SETUP DES SCENES AVEC CSS
+        // ============================================
+
+        VBox rootPanel = new VBox(root);
+        rootPanel.setAlignment(Pos.CENTER);
+        root.setMaxWidth(400);
+        root.getStyleClass().add("menu-container");
+
+        Scene scene = new Scene(rootPanel, 500, 650);
+        try {
+            scene.getStylesheets()
+                    .add(getClass().getResource("/style.css").toExternalForm());
+        } catch (Exception ex) {
+            System.err.println("style.css introuvable.");
+        }
         primaryStage.setScene(scene);
         primaryStage.show();
     }
@@ -121,46 +136,43 @@ public class MainFX extends Application {
     private void lancerPartie(boolean iaBlanc, boolean iaNoir, Niveau niveauBlanc, Niveau niveauNoir) {
         ControleurPartieGUI controleur = new ControleurPartieGUI(iaBlanc, iaNoir, niveauBlanc, niveauNoir);
 
-        // Layout principal de la partie
         javafx.scene.layout.BorderPane borderPane = new javafx.scene.layout.BorderPane();
+        borderPane.setPadding(new Insets(20));
 
-        // Centre : Echiquier
-        borderPane.setCenter(controleur.getVue());
+        // Centre : Echiquier encapsulé pour l'ombre complète
+        javafx.scene.layout.StackPane boardWrapper = new javafx.scene.layout.StackPane();
+        boardWrapper.getChildren().add(controleur.getVue());
+        boardWrapper.setMaxSize(480, 480);
+        boardWrapper.getStyleClass().add("board-container");
+        borderPane.setCenter(boardWrapper);
 
-        // Bas : Barre d'outils (Undo, etc.)
-        javafx.scene.layout.HBox toolbar = new javafx.scene.layout.HBox(10);
+        // Bas : Barre d'outils
+        javafx.scene.layout.HBox toolbar = new javafx.scene.layout.HBox(15);
         toolbar.setAlignment(Pos.CENTER);
-        toolbar.setPadding(new Insets(10));
+        toolbar.setPadding(new Insets(20, 0, 0, 0));
 
         Button btnAnnuler = new Button("Annuler coup");
         btnAnnuler.setOnAction(e -> controleur.annulerCoup());
 
-        // On n'affiche le bouton annuler que si au moins un humain joue ?
-        // Ou même en IA vs IA pour revenir en arrière ?
-        // Le user a dit : "fais en sorte que je puisse retourner en arriere quand il
-        // s'agit d'affronter une ia seulement"
-        // Donc HvIA ou IAvH.
         boolean modeHvIA = (iaBlanc && !iaNoir) || (!iaBlanc && iaNoir);
         if (modeHvIA) {
             toolbar.getChildren().add(btnAnnuler);
-        } else {
-            // on peut le laisser tout le temps pour debug ou spectateur,
-            // mais respectons la demande stricte : "quand il s'agit d'affronter une ia
-            // seulement"
-            // Interprétation : Humain vs IA.
-            // Mais bon, "IA vs IA" c'est affronter une IA vs une IA...
-            // La demande est "affronter une ia", sous entendu "Moi (joueur) affronte une
-            // IA".
         }
 
-        // Ajoutons un bouton "Menu Principal" pour revenir
         Button btnMenu = new Button("Menu Principal");
+        btnMenu.getStyleClass().add("button-accent");
         btnMenu.setOnAction(e -> montrerMenuPrincipal());
         toolbar.getChildren().add(btnMenu);
 
         borderPane.setBottom(toolbar);
 
-        Scene scene = new Scene(borderPane, 600, 650);
+        Scene scene = new Scene(borderPane, 600, 700);
+        try {
+            scene.getStylesheets()
+                    .add(getClass().getResource("/style.css").toExternalForm());
+        } catch (Exception ex) {
+            System.err.println("style.css introuvable.");
+        }
 
         primaryStage.setScene(scene);
         primaryStage.centerOnScreen();

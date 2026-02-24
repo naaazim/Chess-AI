@@ -1,12 +1,14 @@
 package org.example.AI;
 
 /**
- * <p>3 niveaux de difficulté (profondeur de recherche de base).</p>
+ * <p>
+ * 3 niveaux de difficulté (profondeur de recherche de base).
+ * </p>
  */
 public enum Niveau {
-    FACILE(2),
-    MOYEN(3),
-    DIFFICILE(4);
+    FACILE(3),
+    MOYEN(5),
+    DIFFICILE(7);
 
     private final int profondeur;
 

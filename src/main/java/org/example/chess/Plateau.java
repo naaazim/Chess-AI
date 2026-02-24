@@ -6,7 +6,8 @@ package org.example.chess;
  * </p>
  *
  * <p>
- * Elle utilise des bitboards (long 64 bits) pour être rapide, car l’IA va générer
+ * Elle utilise des bitboards (long 64 bits) pour être rapide, car l’IA va
+ * générer
  * énormément de coups (grand facteur de branchement).
  * </p>
  *
@@ -14,8 +15,8 @@ package org.example.chess;
  * Convention d’index :
  * </p>
  * <ul>
- *   <li>0 = a8</li>
- *   <li>63 = h1</li>
+ * <li>0 = a8</li>
+ * <li>63 = h1</li>
  * </ul>
  */
 public final class Plateau {
@@ -42,7 +43,6 @@ public final class Plateau {
     private boolean roqueNoirRoi;
     private boolean roqueNoirReine;
 
-
     private long enPassant; // bitboard 1 case ou 0
 
     // Dérivés (performance)
@@ -52,11 +52,13 @@ public final class Plateau {
     private long vides;
 
     /**
-     * <p>Construit un plateau vide (debug/tests) :</p>
+     * <p>
+     * Construit un plateau vide (debug/tests) :
+     * </p>
      * <ul>
-     *   <li>trait = BLANC</li>
-     *   <li>pas de roques</li>
-     *   <li>pas d’en passant</li>
+     * <li>trait = BLANC</li>
+     * <li>pas de roques</li>
+     * <li>pas d’en passant</li>
      * </ul>
      */
     public Plateau() {
@@ -69,39 +71,80 @@ public final class Plateau {
         recalculerDerives();
     }
 
+    /**
+     * <p>
+     * Créé une copie profonde du plateau courant.
+     * </p>
+     * Utile pour la recherche concurrente.
+     */
+    public Plateau copie() {
+        Plateau copie = new Plateau();
+        copie.pionsBlancs = this.pionsBlancs;
+        copie.cavaliersBlancs = this.cavaliersBlancs;
+        copie.fousBlancs = this.fousBlancs;
+        copie.toursBlanches = this.toursBlanches;
+        copie.reineBlanche = this.reineBlanche;
+        copie.roiBlanc = this.roiBlanc;
+        copie.pionsNoirs = this.pionsNoirs;
+        copie.cavaliersNoirs = this.cavaliersNoirs;
+        copie.fousNoirs = this.fousNoirs;
+        copie.toursNoires = this.toursNoires;
+        copie.reineNoire = this.reineNoire;
+        copie.roiNoir = this.roiNoir;
+        copie.trait = this.trait;
+        copie.roqueBlancRoi = this.roqueBlancRoi;
+        copie.roqueBlancReine = this.roqueBlancReine;
+        copie.roqueNoirRoi = this.roqueNoirRoi;
+        copie.roqueNoirReine = this.roqueNoirReine;
+        copie.enPassant = this.enPassant;
+        copie.recalculerDerives();
+        return copie;
+    }
+
     public long getEnPassant() {
         return enPassant;
     }
+
     /**
-     * <p>Vrai si le blanc a encore le droit de roquer côté roi (petit roque).</p>
+     * <p>
+     * Vrai si le blanc a encore le droit de roquer côté roi (petit roque).
+     * </p>
      */
     public boolean getRoqueBlancRoi() {
         return roqueBlancRoi;
     }
 
     /**
-     * <p>Vrai si le blanc a encore le droit de roquer côté reine (grand roque).</p>
+     * <p>
+     * Vrai si le blanc a encore le droit de roquer côté reine (grand roque).
+     * </p>
      */
     public boolean getRoqueBlancReine() {
         return roqueBlancReine;
     }
 
     /**
-     * <p>Vrai si le noir a encore le droit de roquer côté roi (petit roque).</p>
+     * <p>
+     * Vrai si le noir a encore le droit de roquer côté roi (petit roque).
+     * </p>
      */
     public boolean getRoqueNoirRoi() {
         return roqueNoirRoi;
     }
 
     /**
-     * <p>Vrai si le noir a encore le droit de roquer côté reine (grand roque).</p>
+     * <p>
+     * Vrai si le noir a encore le droit de roquer côté reine (grand roque).
+     * </p>
      */
     public boolean getRoqueNoirReine() {
         return roqueNoirReine;
     }
 
     /**
-     * <p>Crée la position initiale standard.</p>
+     * <p>
+     * Crée la position initiale standard.
+     * </p>
      *
      * @return plateau initial
      */
@@ -110,7 +153,9 @@ public final class Plateau {
     }
 
     /**
-     * <p>Crée un plateau depuis une chaîne FEN (version simple).</p>
+     * <p>
+     * Crée un plateau depuis une chaîne FEN (version simple).
+     * </p>
      *
      * @param fen chaîne FEN
      * @return plateau correspondant
@@ -142,7 +187,8 @@ public final class Plateau {
         int indice = 0; // 0=a8
         for (int i = 0; i < placement.length(); i++) {
             char c = placement.charAt(i);
-            if (c == '/') continue;
+            if (c == '/')
+                continue;
 
             if (Character.isDigit(c)) {
                 indice += (c - '0');
@@ -196,14 +242,18 @@ public final class Plateau {
     }
 
     /**
-     * <p>Retourne la couleur au trait.</p>
+     * <p>
+     * Retourne la couleur au trait.
+     * </p>
      */
     public Couleur trait() {
         return trait;
     }
 
     /**
-     * <p>Bitboard d’une pièce exacte.</p>
+     * <p>
+     * Bitboard d’une pièce exacte.
+     * </p>
      *
      * @param piece pièce exacte
      * @return bitboard correspondant
@@ -242,50 +292,78 @@ public final class Plateau {
     public Piece pieceEn(Case c) {
         long b = c.bit();
 
-        if ((pionsBlancs & b) != 0) return Piece.PION_BLANC;
-        if ((cavaliersBlancs & b) != 0) return Piece.CAVALIER_BLANC;
-        if ((fousBlancs & b) != 0) return Piece.FOU_BLANC;
-        if ((toursBlanches & b) != 0) return Piece.TOUR_BLANC;
-        if ((reineBlanche & b) != 0) return Piece.DAME_BLANCHE;
-        if ((roiBlanc & b) != 0) return Piece.ROI_BLANC;
+        if ((pionsBlancs & b) != 0)
+            return Piece.PION_BLANC;
+        if ((cavaliersBlancs & b) != 0)
+            return Piece.CAVALIER_BLANC;
+        if ((fousBlancs & b) != 0)
+            return Piece.FOU_BLANC;
+        if ((toursBlanches & b) != 0)
+            return Piece.TOUR_BLANC;
+        if ((reineBlanche & b) != 0)
+            return Piece.DAME_BLANCHE;
+        if ((roiBlanc & b) != 0)
+            return Piece.ROI_BLANC;
 
-        if ((pionsNoirs & b) != 0) return Piece.PION_NOIR;
-        if ((cavaliersNoirs & b) != 0) return Piece.CAVALIER_NOIR;
-        if ((fousNoirs & b) != 0) return Piece.FOU_NOIR;
-        if ((toursNoires & b) != 0) return Piece.TOUR_NOIR;
-        if ((reineNoire & b) != 0) return Piece.DAME_NOIRE;
-        if ((roiNoir & b) != 0) return Piece.ROI_NOIR;
+        if ((pionsNoirs & b) != 0)
+            return Piece.PION_NOIR;
+        if ((cavaliersNoirs & b) != 0)
+            return Piece.CAVALIER_NOIR;
+        if ((fousNoirs & b) != 0)
+            return Piece.FOU_NOIR;
+        if ((toursNoires & b) != 0)
+            return Piece.TOUR_NOIR;
+        if ((reineNoire & b) != 0)
+            return Piece.DAME_NOIRE;
+        if ((roiNoir & b) != 0)
+            return Piece.ROI_NOIR;
 
         return null;
     }
 
-    public long blancs() { return blancs; }
-    public long noirs() { return noirs; }
-    public long occupes() { return occupes; }
-    public long vides() { return vides; }
+    public long blancs() {
+        return blancs;
+    }
+
+    public long noirs() {
+        return noirs;
+    }
+
+    public long occupes() {
+        return occupes;
+    }
+
+    public long vides() {
+        return vides;
+    }
 
     /**
-     * <p>Joue un coup (modifie le plateau).</p>
+     * <p>
+     * Joue un coup (modifie le plateau).
+     * </p>
      */
     public void jouer(Coup coup) {
         jouerSansSauvegarde(coup);
     }
 
     /**
-     * <p>Joue un coup et retourne une sauvegarde pour pouvoir annuler.</p>
+     * <p>
+     * Joue un coup et retourne une sauvegarde pour pouvoir annuler.
+     * </p>
      */
     public EtatPlateau jouerAvecSauvegarde(Coup coup) {
         EtatPlateau s = new EtatPlateau(
                 pionsBlancs, cavaliersBlancs, fousBlancs, toursBlanches, reineBlanche, roiBlanc,
                 pionsNoirs, cavaliersNoirs, fousNoirs, toursNoires, reineNoire, roiNoir,
-                trait, roqueBlancRoi, roqueBlancReine, roqueNoirRoi, roqueNoirReine, enPassant
-        );
+                trait, roqueBlancRoi, roqueBlancReine, roqueNoirRoi, roqueNoirReine, enPassant);
         jouerSansSauvegarde(coup);
         return s;
     }
 
     /**
-     * <p>Annule en restaurant la sauvegarde.</p>
+     * <p>
+     * Annule en restaurant la sauvegarde.
+     * </p>
      */
     public void annuler(EtatPlateau sauvegarde) {
         this.pionsBlancs = sauvegarde.pionsBlancs();
@@ -313,21 +391,27 @@ public final class Plateau {
     }
 
     /**
-     * <p>Échec pour une couleur ? (délégué à l’arbitre).</p>
+     * <p>
+     * Échec pour une couleur ? (délégué à l’arbitre).
+     * </p>
      */
     public boolean estEnEchec(Couleur couleur) {
         return Arbitre.estEnEchec(this, couleur);
     }
 
     /**
-     * <p>Cases attaquées par une couleur (délégué à l’arbitre).</p>
+     * <p>
+     * Cases attaquées par une couleur (délégué à l’arbitre).
+     * </p>
      */
     public long casesAttaqueesPar(Couleur couleur) {
         return Arbitre.casesAttaqueesPar(this, couleur);
     }
 
     /**
-     * <p>Affichage ASCII simple pour debug.</p>
+     * <p>
+     * Affichage ASCII simple pour debug.
+     * </p>
      */
     public String versASCII() {
         StringBuilder sb = new StringBuilder();
@@ -350,37 +434,76 @@ public final class Plateau {
         return versASCII();
     }
 
-    /* ===========================
-       Getters bitboards (utilisés par Arbitre)
-       =========================== */
+    /*
+     * ===========================
+     * Getters bitboards (utilisés par Arbitre)
+     * ===========================
+     */
 
-    long pionsBlancsBitboard() { return pionsBlancs; }
-    long cavaliersBlancsBitboard() { return cavaliersBlancs; }
-    long fousBlancsBitboard() { return fousBlancs; }
-    long toursBlanchesBitboard() { return toursBlanches; }
-    long reineBlancheBitboard() { return reineBlanche; }
-    long roiBlancBitboard() { return roiBlanc; }
+    long pionsBlancsBitboard() {
+        return pionsBlancs;
+    }
 
-    long pionsNoirsBitboard() { return pionsNoirs; }
-    long cavaliersNoirsBitboard() { return cavaliersNoirs; }
-    long fousNoirsBitboard() { return fousNoirs; }
-    long toursNoiresBitboard() { return toursNoires; }
-    long reineNoireBitboard() { return reineNoire; }
-    long roiNoirBitboard() { return roiNoir; }
+    long cavaliersBlancsBitboard() {
+        return cavaliersBlancs;
+    }
 
-    /* ===========================
-       Internes
-       =========================== */
+    long fousBlancsBitboard() {
+        return fousBlancs;
+    }
+
+    long toursBlanchesBitboard() {
+        return toursBlanches;
+    }
+
+    long reineBlancheBitboard() {
+        return reineBlanche;
+    }
+
+    long roiBlancBitboard() {
+        return roiBlanc;
+    }
+
+    long pionsNoirsBitboard() {
+        return pionsNoirs;
+    }
+
+    long cavaliersNoirsBitboard() {
+        return cavaliersNoirs;
+    }
+
+    long fousNoirsBitboard() {
+        return fousNoirs;
+    }
+
+    long toursNoiresBitboard() {
+        return toursNoires;
+    }
+
+    long reineNoireBitboard() {
+        return reineNoire;
+    }
+
+    long roiNoirBitboard() {
+        return roiNoir;
+    }
+
+    /*
+     * ===========================
+     * Internes
+     * ===========================
+     */
 
     private void recalculerDerives() {
         blancs = pionsBlancs | cavaliersBlancs | fousBlancs | toursBlanches | reineBlanche | roiBlanc;
-        noirs  = pionsNoirs  | cavaliersNoirs  | fousNoirs  | toursNoires  | reineNoire  | roiNoir;
+        noirs = pionsNoirs | cavaliersNoirs | fousNoirs | toursNoires | reineNoire | roiNoir;
         occupes = blancs | noirs;
         vides = ~occupes;
     }
 
     private void jouerSansSauvegarde(Coup coup) {
-        if (coup == null) throw new IllegalArgumentException("Coup null");
+        if (coup == null)
+            throw new IllegalArgumentException("Coup null");
 
         Piece piece = coup.pieceDeplacee();
         long depart = coup.depart().bit();
@@ -401,8 +524,10 @@ public final class Plateau {
             int idxArr = coup.arrivee().indice();
             int idxPionCapture = (trait == Couleur.BLANC) ? (idxArr + 8) : (idxArr - 8);
             long bitPionCapture = 1L << idxPionCapture;
-            if (trait == Couleur.BLANC) pionsNoirs &= ~bitPionCapture;
-            else pionsBlancs &= ~bitPionCapture;
+            if (trait == Couleur.BLANC)
+                pionsNoirs &= ~bitPionCapture;
+            else
+                pionsBlancs &= ~bitPionCapture;
         }
 
         // 3) Déplacement de la pièce
@@ -411,10 +536,13 @@ public final class Plateau {
         // 4) Promotion
         if (coup.estPromotion()) {
             Piece promo = coup.piecePromotion();
-            if (promo == null) throw new IllegalArgumentException("Promotion sans piècePromotion");
+            if (promo == null)
+                throw new IllegalArgumentException("Promotion sans piècePromotion");
 
-            if (piece == Piece.PION_BLANC) pionsBlancs &= ~arrivee;
-            if (piece == Piece.PION_NOIR) pionsNoirs &= ~arrivee;
+            if (piece == Piece.PION_BLANC)
+                pionsBlancs &= ~arrivee;
+            if (piece == Piece.PION_NOIR)
+                pionsNoirs &= ~arrivee;
 
             ajouterPiece(promo, arrivee);
         }
@@ -448,13 +576,17 @@ public final class Plateau {
         if (piece == Piece.PION_BLANC) {
             int dep = coup.depart().indice();
             int arr = coup.arrivee().indice();
-            if (dep - arr == 16) enPassant = 1L << (dep - 8);
-            else enPassant = 0L;
+            if (dep - arr == 16)
+                enPassant = 1L << (dep - 8);
+            else
+                enPassant = 0L;
         } else if (piece == Piece.PION_NOIR) {
             int dep = coup.depart().indice();
             int arr = coup.arrivee().indice();
-            if (arr - dep == 16) enPassant = 1L << (dep + 8);
-            else enPassant = 0L;
+            if (arr - dep == 16)
+                enPassant = 1L << (dep + 8);
+            else
+                enPassant = 0L;
         } else {
             enPassant = 0L;
         }
@@ -553,16 +685,24 @@ public final class Plateau {
         }
 
         if (piece == Piece.TOUR_BLANC) {
-            if (dep == 63) roqueBlancRoi = false;   // h1
-            if (dep == 56) roqueBlancReine = false; // a1
+            if (dep == 63)
+                roqueBlancRoi = false; // h1
+            if (dep == 56)
+                roqueBlancReine = false; // a1
         } else if (piece == Piece.TOUR_NOIR) {
-            if (dep == 7) roqueNoirRoi = false;     // h8
-            if (dep == 0) roqueNoirReine = false;   // a8
+            if (dep == 7)
+                roqueNoirRoi = false; // h8
+            if (dep == 0)
+                roqueNoirReine = false; // a8
         }
 
-        if ((arrivee & (1L << 63)) != 0) roqueBlancRoi = false;
-        if ((arrivee & (1L << 56)) != 0) roqueBlancReine = false;
-        if ((arrivee & (1L << 7)) != 0) roqueNoirRoi = false;
-        if ((arrivee & (1L << 0)) != 0) roqueNoirReine = false;
+        if ((arrivee & (1L << 63)) != 0)
+            roqueBlancRoi = false;
+        if ((arrivee & (1L << 56)) != 0)
+            roqueBlancReine = false;
+        if ((arrivee & (1L << 7)) != 0)
+            roqueNoirRoi = false;
+        if ((arrivee & (1L << 0)) != 0)
+            roqueNoirReine = false;
     }
 }

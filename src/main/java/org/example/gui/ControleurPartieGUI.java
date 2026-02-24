@@ -20,6 +20,8 @@ public class ControleurPartieGUI {
     private final VueEchiquier vue;
     private final SelecteurCoup selecteur;
 
+    private final ProfilerPartie profiler;
+
     // Configuration partie
     private boolean iaJoueBlanc;
     private boolean iaJoueNoir;
@@ -43,8 +45,11 @@ public class ControleurPartieGUI {
         this.niveauIANoir = niveauNoir;
         this.partieTerminee = false;
 
+        this.profiler = new ProfilerPartie(iaBlanc, iaNoir, niveauBlanc, niveauNoir);
+
         rafraichirVue();
-        verifierTourIA();
+        // Ne pas appeler verifierTourIA() ici pour éviter le lancement en double, c'est
+        // appelé par demarrer()
     }
 
     // Constructeur de compatibilité si besoin (ou à supprimer si on met à jour tous
@@ -175,7 +180,7 @@ public class ControleurPartieGUI {
                     // Simuler une mini "réflexion" pour pas que ça soit instantané (optionnel)
                     Thread.sleep(100);
                     Niveau niveauCourant = (plateau.trait() == Couleur.BLANC) ? niveauIABlanc : niveauIANoir;
-                    return RechercheMinimaxAlphaBeta.meilleurCoup(plateau, niveauCourant);
+                    return RechercheMinimaxAlphaBeta.meilleurCoup(plateau, niveauCourant, profiler);
                 }
             };
 
@@ -243,7 +248,10 @@ public class ControleurPartieGUI {
         if (legaux.isEmpty()) {
             partieTerminee = true;
             boolean echec = plateau.estEnEchec(plateau.trait());
-            String message = echec ? "ECHEC ET MAT ! " + plateau.trait().inverse() + " gagne." : "PAT ! Match nul.";
+            String vainqueur = echec ? plateau.trait().inverse().toString() : "Nul";
+            profiler.marquerFinDePartie(vainqueur);
+
+            String message = echec ? "ECHEC ET MAT ! " + vainqueur + " gagne." : "PAT ! Match nul.";
             afficherFin(message);
         } else {
             // Cas particulier : matériel insuffisant, répétition... (non géré par le moteur
@@ -260,6 +268,19 @@ public class ControleurPartieGUI {
             alert.setTitle("Fin de partie");
             alert.setHeaderText(null);
             alert.showAndWait();
+
+            Alert statsAlert = new Alert(Alert.AlertType.CONFIRMATION, "Sauvegarder les statistiques de cette partie ?",
+                    ButtonType.YES, ButtonType.NO);
+            statsAlert.setTitle("Statistiques");
+            statsAlert.setHeaderText("Fin de partie");
+            statsAlert.showAndWait().ifPresent(response -> {
+                if (response == ButtonType.YES) {
+                    javafx.stage.Window window = vue.getScene().getWindow();
+                    if (window instanceof javafx.stage.Stage) {
+                        profiler.sauvegarderStatistiques((javafx.stage.Stage) window);
+                    }
+                }
+            });
         });
     }
 
