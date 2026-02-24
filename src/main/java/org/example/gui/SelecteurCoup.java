@@ -90,6 +90,15 @@ public class SelecteurCoup {
         return caseDepart;
     }
 
+    public List<Coup> getCoupsPossiblesSelection() {
+        if (caseDepart == null) {
+            return Collections.emptyList();
+        }
+        return coupsLegaux.stream()
+                .filter(c -> c.depart().equals(caseDepart))
+                .collect(Collectors.toList());
+    }
+
     /**
      * Cherche un coup légal correspondant à (Depart, Arrivee).
      * Gère la promotion par défaut (Reine).

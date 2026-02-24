@@ -75,18 +75,7 @@ public class VueEchiquier extends GridPane {
         }
     }
 
-    public void rafraichir(Plateau plateau, Case selection, Coup dernierCoup) {
-        // Pour simplifier l'implémentation sans gérer finement les enfants du GridPane
-        // :
-        // On parcourt les enfants (StackPanes) et on met à jour leur contenu.
-        // L'ordre d'ajout dans le GridPane est (col, row).
-        // Mais attention l'ordre dans getChildren() n'est pas garanti 100% stable si
-        // modifs dynamiques.
-        // Mieux vaut reconstruire ou utiliser un tableau 2D de références.
-
-        // Recréons le contenu "pièce" et "surbrillance" par dessus les fonds
-        // C'est un peu brute-force mais sûr.
-
+    public void rafraichir(Plateau plateau, Case selection, Coup dernierCoup, java.util.List<Coup> coupsPossibles) {
         this.getChildren().clear();
 
         for (int lig = 0; lig < 8; lig++) {
@@ -130,6 +119,19 @@ public class VueEchiquier extends GridPane {
                 StackPane stack = new StackPane(rect, highlight);
                 if (pieceNode != null) {
                     stack.getChildren().add(pieceNode);
+                }
+
+                // Affichage coups possibles
+                if (coupsPossibles != null) {
+                    for (Coup coup : coupsPossibles) {
+                        if (coup.arrivee().equals(caseCourante)) {
+                            javafx.scene.shape.Circle circle = new javafx.scene.shape.Circle(TAILLE_CASE / 6.0);
+                            circle.setFill(Color.rgb(0, 0, 0, 0.2)); // rond gris un peu transparent
+                            circle.setMouseTransparent(true);
+                            stack.getChildren().add(circle);
+                            break;
+                        }
+                    }
                 }
 
                 // Interaction

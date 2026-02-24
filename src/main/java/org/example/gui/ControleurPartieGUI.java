@@ -1,6 +1,12 @@
 package org.example.gui;
 
 import javafx.application.Platform;
+import javafx.beans.property.ReadOnlyIntegerProperty;
+import javafx.beans.property.ReadOnlyStringProperty;
+import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
@@ -9,6 +15,7 @@ import org.example.AI.RechercheMinimaxAlphaBeta;
 import org.example.chess.*;
 
 import java.util.List;
+import java.util.Stack;
 
 /**
  * Contrôleur principal de la partie GUI.
@@ -31,8 +38,13 @@ public class ControleurPartieGUI {
     private boolean partieTerminee;
     private Coup dernierCoupJoue;
 
-    // Historique pour l'annulation
-    private final java.util.Stack<EtatPlateau> historique = new java.util.Stack<>();
+    // Historique complet (undo + notation SAN)
+    private final Stack<EntreeHistorique> historique = new Stack<>();
+    private final ObservableList<String> historiqueAffichage = FXCollections.observableArrayList();
+
+    // Avantage matériel (positif = blancs, négatif = noirs)
+    private final SimpleIntegerProperty avantageMateriel = new SimpleIntegerProperty(0);
+    private final SimpleStringProperty avantageMaterielTexte = new SimpleStringProperty("Égalité matérielle");
 
     public ControleurPartieGUI(boolean iaBlanc, boolean iaNoir, Niveau niveauBlanc, Niveau niveauNoir) {
         this.plateau = Plateau.positionInitiale();
@@ -60,6 +72,18 @@ public class ControleurPartieGUI {
 
     public VueEchiquier getVue() {
         return vue;
+    }
+
+    public ObservableList<String> getHistoriqueAffichage() {
+        return historiqueAffichage;
+    }
+
+    public ReadOnlyIntegerProperty avantageMaterielProperty() {
+        return avantageMateriel;
+    }
+
+    public ReadOnlyStringProperty avantageMaterielTexteProperty() {
+        return avantageMaterielTexte;
     }
 
     /**
@@ -91,28 +115,17 @@ public class ControleurPartieGUI {
             // était l'humain.
             // Donc on pop 2 fois.
             if (!estTourIA() && historique.size() >= 2) {
-                // Annulation coup IA
-                EtatPlateau stateIA = historique.pop();
-                plateau.annuler(stateIA);
-
-                // Annulation coup Humain
-                EtatPlateau stateHumain = historique.pop();
-                plateau.annuler(stateHumain);
-
-                dernierCoupJoue = null; // On perd l'info du dernier coup joué visuellement (ou il faudrait le stocker
-                                        // dans l'historique aussi)
-                // Pour faire propre, il faudrait que l'historique stocke aussi le "dernierCoup"
-                // pour l'affichage.
-                // Ici on simplifie : plus de surbrillance dernier coup après undo.
+                annulerDernierCoupInterne();
+                annulerDernierCoupInterne();
+                dernierCoupJoue = historique.isEmpty() ? null : historique.peek().coup();
 
                 rafraichirVue();
                 preparerTourSuivant(); // Pour remettre à jour les coups légaux
             }
         } else {
             // Mode H vs H ou IA vs IA : on annule 1 seul coup
-            EtatPlateau state = historique.pop();
-            plateau.annuler(state);
-            dernierCoupJoue = null;
+            annulerDernierCoupInterne();
+            dernierCoupJoue = historique.isEmpty() ? null : historique.peek().coup();
             rafraichirVue();
             preparerTourSuivant();
         }
@@ -168,6 +181,14 @@ public class ControleurPartieGUI {
         return false;
     }
 
+    private void annulerDernierCoupInterne() {
+        if (historique.isEmpty()) {
+            return;
+        }
+        EntreeHistorique entree = historique.pop();
+        plateau.annuler(entree.etatAvant());
+    }
+
     private void verifierTourIA() {
         if (partieTerminee)
             return;
@@ -203,6 +224,9 @@ public class ControleurPartieGUI {
     }
 
     private void jouerCoup(Coup coup) {
+        List<Coup> legauxAvantCoup = GenerateurCoups.genererLegaux(plateau);
+        String notationSAN = NotationEchecs.versSAN(plateau, coup, legauxAvantCoup);
+
         // Sauvegarde pour undo
         // Attention : Plateau.jouerAvecSauvegarde joue le coup et retourne l'état
         // AVANT.
@@ -210,7 +234,7 @@ public class ControleurPartieGUI {
         // Plateau.jouerAvecSauvegarde fait : create state -> jouer -> return state.
         // Donc on récupère l'état PRECEDENT le coup. C'est ce qu'on veut empiler.
         EtatPlateau state = plateau.jouerAvecSauvegarde(coup);
-        historique.push(state);
+        historique.push(new EntreeHistorique(state, coup, notationSAN));
 
         // Note: jouerAvecSauvegarde a DEJA joué le coup.
         dernierCoupJoue = coup;
@@ -289,7 +313,10 @@ public class ControleurPartieGUI {
         Platform.runLater(() -> {
             // On récupère la sélection courante pour la surbrillance
             Case selection = selecteur.getCaseDepart();
-            vue.rafraichir(plateau, selection, dernierCoupJoue);
+            List<Coup> coupsPossibles = selecteur.getCoupsPossiblesSelection();
+            vue.rafraichir(plateau, selection, dernierCoupJoue, coupsPossibles);
+            mettreAJourHistoriqueAffichage();
+            mettreAJourAvantageMateriel();
         });
     }
 
@@ -298,5 +325,61 @@ public class ControleurPartieGUI {
      */
     public void demarrer() {
         preparerTourSuivant();
+    }
+
+    private void mettreAJourHistoriqueAffichage() {
+        historiqueAffichage.clear();
+        for (int i = 0; i < historique.size(); i += 2) {
+            int numeroCoup = (i / 2) + 1;
+            String coupBlanc = historique.get(i).notationSAN();
+            String coupNoir = (i + 1 < historique.size()) ? historique.get(i + 1).notationSAN() : "";
+            if (coupNoir.isBlank()) {
+                historiqueAffichage.add(numeroCoup + ". " + coupBlanc);
+            } else {
+                historiqueAffichage.add(numeroCoup + ". " + coupBlanc + "   " + coupNoir);
+            }
+        }
+    }
+
+    private void mettreAJourAvantageMateriel() {
+        int scoreBlanc = scoreMateriel(
+                Piece.PION_BLANC, 1,
+                Piece.CAVALIER_BLANC, 3,
+                Piece.FOU_BLANC, 3,
+                Piece.TOUR_BLANC, 5,
+                Piece.DAME_BLANCHE, 9);
+        int scoreNoir = scoreMateriel(
+                Piece.PION_NOIR, 1,
+                Piece.CAVALIER_NOIR, 3,
+                Piece.FOU_NOIR, 3,
+                Piece.TOUR_NOIR, 5,
+                Piece.DAME_NOIRE, 9);
+
+        int ecart = scoreBlanc - scoreNoir;
+        avantageMateriel.set(ecart);
+
+        if (ecart > 0) {
+            avantageMaterielTexte.set("Avantage Blancs : +" + ecart);
+        } else if (ecart < 0) {
+            avantageMaterielTexte.set("Avantage Noirs : +" + (-ecart));
+        } else {
+            avantageMaterielTexte.set("Égalité matérielle");
+        }
+    }
+
+    private int scoreMateriel(
+            Piece p1, int v1,
+            Piece p2, int v2,
+            Piece p3, int v3,
+            Piece p4, int v4,
+            Piece p5, int v5) {
+        return Long.bitCount(plateau.bitboard(p1)) * v1
+                + Long.bitCount(plateau.bitboard(p2)) * v2
+                + Long.bitCount(plateau.bitboard(p3)) * v3
+                + Long.bitCount(plateau.bitboard(p4)) * v4
+                + Long.bitCount(plateau.bitboard(p5)) * v5;
+    }
+
+    private record EntreeHistorique(EtatPlateau etatAvant, Coup coup, String notationSAN) {
     }
 }

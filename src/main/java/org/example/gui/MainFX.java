@@ -1,14 +1,20 @@
 package org.example.gui;
 
 import javafx.application.Application;
+import javafx.collections.ListChangeListener;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.ListView;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.ToggleGroup;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import org.example.AI.Niveau;
@@ -136,18 +142,27 @@ public class MainFX extends Application {
     private void lancerPartie(boolean iaBlanc, boolean iaNoir, Niveau niveauBlanc, Niveau niveauNoir) {
         ControleurPartieGUI controleur = new ControleurPartieGUI(iaBlanc, iaNoir, niveauBlanc, niveauNoir);
 
-        javafx.scene.layout.BorderPane borderPane = new javafx.scene.layout.BorderPane();
+        BorderPane borderPane = new BorderPane();
         borderPane.setPadding(new Insets(20));
 
         // Centre : Echiquier encapsulé pour l'ombre complète
-        javafx.scene.layout.StackPane boardWrapper = new javafx.scene.layout.StackPane();
+        StackPane boardWrapper = new StackPane();
         boardWrapper.getChildren().add(controleur.getVue());
+        boardWrapper.setPrefSize(480, 480);
         boardWrapper.setMaxSize(480, 480);
         boardWrapper.getStyleClass().add("board-container");
-        borderPane.setCenter(boardWrapper);
+
+        VBox panneauInfos = creerPanneauInfos(controleur);
+
+        // HBox pour aligner l'échiquier et les infos au centre
+        HBox centralLayout = new HBox(30);
+        centralLayout.setAlignment(Pos.CENTER);
+        centralLayout.getChildren().addAll(boardWrapper, panneauInfos);
+
+        borderPane.setCenter(centralLayout);
 
         // Bas : Barre d'outils
-        javafx.scene.layout.HBox toolbar = new javafx.scene.layout.HBox(15);
+        HBox toolbar = new HBox(15);
         toolbar.setAlignment(Pos.CENTER);
         toolbar.setPadding(new Insets(20, 0, 0, 0));
 
@@ -166,7 +181,7 @@ public class MainFX extends Application {
 
         borderPane.setBottom(toolbar);
 
-        Scene scene = new Scene(borderPane, 600, 700);
+        Scene scene = new Scene(borderPane, 930, 720);
         try {
             scene.getStylesheets()
                     .add(getClass().getResource("/style.css").toExternalForm());
@@ -179,6 +194,55 @@ public class MainFX extends Application {
 
         // Démarrer la logique du contrôleur (ex: calcul premier coup si IA commence)
         controleur.demarrer();
+    }
+
+    private VBox creerPanneauInfos(ControleurPartieGUI controleur) {
+        VBox panneau = new VBox(12);
+        panneau.setMinWidth(250);
+        panneau.setPrefWidth(280);
+        panneau.setMinHeight(480);
+        panneau.setMaxHeight(480);
+        panneau.getStyleClass().add("side-panel");
+
+        Label titreHistorique = new Label("Historique (SAN)");
+        titreHistorique.getStyleClass().add("side-panel-title");
+
+        ListView<String> listeHistorique = new ListView<>();
+        listeHistorique.setItems(controleur.getHistoriqueAffichage());
+        listeHistorique.setFocusTraversable(false);
+        listeHistorique.setPrefHeight(420);
+        listeHistorique.getStyleClass().add("history-list");
+        VBox.setVgrow(listeHistorique, Priority.ALWAYS);
+
+        controleur.getHistoriqueAffichage().addListener((ListChangeListener<String>) change -> {
+            if (!controleur.getHistoriqueAffichage().isEmpty()) {
+                listeHistorique.scrollTo(controleur.getHistoriqueAffichage().size() - 1);
+            }
+        });
+
+        Label titreAvantage = new Label("Avantage matériel");
+        titreAvantage.getStyleClass().add("side-panel-title");
+
+        Label lblAvantage = new Label();
+        lblAvantage.getStyleClass().add("advantage-value");
+        lblAvantage.textProperty().bind(controleur.avantageMaterielTexteProperty());
+        appliquerStyleAvantage(lblAvantage, controleur.avantageMaterielProperty().get());
+        controleur.avantageMaterielProperty()
+                .addListener((obs, oldVal, newVal) -> appliquerStyleAvantage(lblAvantage, newVal.intValue()));
+
+        panneau.getChildren().addAll(titreHistorique, listeHistorique, titreAvantage, lblAvantage);
+        return panneau;
+    }
+
+    private void appliquerStyleAvantage(Label label, int score) {
+        label.getStyleClass().removeAll("advantage-white", "advantage-black", "advantage-even");
+        if (score > 0) {
+            label.getStyleClass().add("advantage-white");
+        } else if (score < 0) {
+            label.getStyleClass().add("advantage-black");
+        } else {
+            label.getStyleClass().add("advantage-even");
+        }
     }
 
     public static void main(String[] args) {
