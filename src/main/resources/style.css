@@ -1,0 +1,149 @@
+/* style.css - Premium Chess GUI Theme */
+
+/* ========================================================================= */
+/* Global / Background                                                       */
+/* ========================================================================= */
+.root {
+    -fx-background-color: linear-gradient(to bottom right, #1e1e24, #15151a);
+    -fx-font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+}
+
+/* ========================================================================= */
+/* Typography                                                                */
+/* ========================================================================= */
+.label {
+    -fx-text-fill: #e0e0e0;
+}
+
+.title-label {
+    -fx-font-size: 26px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #ffffff;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.5), 4, 0, 0, 2);
+}
+
+.subtitle-label {
+    -fx-font-size: 14px;
+    -fx-text-fill: #aaaaaa;
+}
+
+/* ========================================================================= */
+/* Buttons                                                                   */
+/* ========================================================================= */
+.button {
+    -fx-background-color: #4a4a52;
+    -fx-text-fill: #ffffff;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-padding: 10px 20px;
+    -fx-background-radius: 6px;
+    -fx-border-radius: 6px;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 5, 0, 0, 2);
+}
+
+.button:hover {
+    -fx-background-color: #5d5d66;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.4), 8, 0, 0, 3);
+}
+
+.button:pressed {
+    -fx-background-color: #3b3b42;
+    -fx-translate-y: 1px;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 3, 0, 0, 1);
+}
+
+/* Accent Button (e.g., Start Game) */
+.button-accent {
+    -fx-background-color: #779556; /* Green matching chess board */
+}
+
+.button-accent:hover {
+    -fx-background-color: #88a368;
+}
+
+.button-accent:pressed {
+    -fx-background-color: #5c7442;
+}
+
+/* ========================================================================= */
+/* Radio Buttons                                                             */
+/* ========================================================================= */
+.radio-button {
+    -fx-text-fill: #e0e0e0;
+    -fx-font-size: 14px;
+    -fx-cursor: hand;
+}
+
+.radio-button .radio {
+    -fx-background-color: #2b2b33;
+    -fx-border-color: #4a4a52;
+    -fx-border-radius: 10px;
+}
+
+.radio-button:selected .radio .dot {
+    -fx-background-color: #779556; /* Green accent */
+}
+
+/* ========================================================================= */
+/* ComboBox                                                                  */
+/* ========================================================================= */
+.combo-box {
+    -fx-background-color: #2b2b33;
+    -fx-background-radius: 4px;
+    -fx-border-color: #4a4a52;
+    -fx-border-radius: 4px;
+    -fx-text-fill: white;
+    -fx-cursor: hand;
+}
+
+.combo-box .list-cell {
+    -fx-text-fill: #e0e0e0;
+    -fx-background-color: #2b2b33;
+}
+
+.combo-box .list-cell:hover {
+    -fx-background-color: #4a4a52;
+}
+
+.combo-box-popup .list-view {
+    -fx-background-color: #2b2b33;
+    -fx-border-color: #4a4a52;
+}
+
+/* ========================================================================= */
+/* Layout Containers                                                         */
+/* ========================================================================= */
+.menu-container {
+    -fx-background-color: rgba(30,30,36,0.8);
+    -fx-background-radius: 12px;
+    -fx-padding: 30px;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.6), 15, 0, 0, 5);
+}
+
+.board-container {
+    -fx-border-color: #111115;
+    -fx-border-width: 4px;
+    -fx-border-radius: 4px;
+    -fx-background-radius: 4px;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.8), 20, 0, 0, 10);
+}
+
+/* ========================================================================= */
+/* Chess Board Coordinates (1-8, a-h)                                        */
+/* ========================================================================= */
+.coord-text {
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+}
+
+/* Light text on dark squares, dark text on light squares */
+.coord-light {
+    -fx-fill: #eceed1; /* Match light square color */
+    -fx-opacity: 0.8;
+}
+
+.coord-dark {
+    -fx-fill: #779556; /* Match dark square color */
+    -fx-opacity: 0.8;
+}
