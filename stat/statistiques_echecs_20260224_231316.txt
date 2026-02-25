@@ -1,0 +1,17 @@
+=========================================
+   Statistiques de la Partie d'Echecs    
+=========================================
+Date : 24/02/2026 23:13:20
+Duree totale de la partie : 130 secondes
+Vainqueur : NOIR
+-----------------------------------------
+Joueur BLANC : IA (FACILE, prof. base 3)
+  Coups joues : 36
+  Temps moyen de reflexion : 0,985 secondes/coup
+  Profondeur moyenne atteinte : 3,44
+-----------------------------------------
+Joueur NOIR : IA (MOYEN, prof. base 5)
+  Coups joues : 36
+  Temps moyen de reflexion : 2,437 secondes/coup
+  Profondeur moyenne atteinte : 3,53
+=========================================
