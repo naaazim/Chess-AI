@@ -26,7 +26,7 @@ public class MainFX extends Application {
     @Override
     public void start(Stage primaryStage) {
         this.primaryStage = primaryStage;
-        this.primaryStage.setTitle("Jeu d'Échecs - MiniMax AlphaBeta");
+        this.primaryStage.setTitle("Deep green");
 
         montrerMenuPrincipal();
     }

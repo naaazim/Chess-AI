@@ -267,6 +267,22 @@ public class ControleurPartieGUI {
     }
 
     private void interpreterFinDePartie() {
+        // Règle des 3 coups (triple répétition)
+        EtatPlateau etatCourant = plateau.sauvegarderEtat();
+        int repetitions = 1; // L'état actuel compte pour 1
+        for (EntreeHistorique entree : historique) {
+            if (entree.etatAvant().equals(etatCourant)) {
+                repetitions++;
+            }
+        }
+
+        if (repetitions >= 3) {
+            partieTerminee = true;
+            profiler.marquerFinDePartie("Nul");
+            afficherFin("Match Nul par triple répétition !");
+            return;
+        }
+
         // On regarde si le joueur au trait a des coups légaux
         List<Coup> legaux = GenerateurCoups.genererLegaux(plateau);
         if (legaux.isEmpty()) {
@@ -278,11 +294,8 @@ public class ControleurPartieGUI {
             String message = echec ? "ECHEC ET MAT ! " + vainqueur + " gagne." : "PAT ! Match nul.";
             afficherFin(message);
         } else {
-            // Cas particulier : matériel insuffisant, répétition... (non géré par le moteur
-            // actuel ?)
-            // Le moteur ne semble pas gérer la règle des 50 coups ou répétition dans
-            // Plateau (sauf si caché dans EtatPlateau/Historique manquant).
-            // On s'en tient à Mat/Pat.
+            // Règle des 50 coups non gérée pour le moment,
+            // mais la répétition est désormais implémentée ci-dessus.
         }
     }
 

@@ -348,14 +348,23 @@ public final class Plateau {
 
     /**
      * <p>
+     * Crée et retourne une sauvegarde de l'état actuel du plateau.
+     * </p>
+     */
+    public EtatPlateau sauvegarderEtat() {
+        return new EtatPlateau(
+                pionsBlancs, cavaliersBlancs, fousBlancs, toursBlanches, reineBlanche, roiBlanc,
+                pionsNoirs, cavaliersNoirs, fousNoirs, toursNoires, reineNoire, roiNoir,
+                trait, roqueBlancRoi, roqueBlancReine, roqueNoirRoi, roqueNoirReine, enPassant);
+    }
+
+    /**
+     * <p>
      * Joue un coup et retourne une sauvegarde pour pouvoir annuler.
      * </p>
      */
     public EtatPlateau jouerAvecSauvegarde(Coup coup) {
-        EtatPlateau s = new EtatPlateau(
-                pionsBlancs, cavaliersBlancs, fousBlancs, toursBlanches, reineBlanche, roiBlanc,
-                pionsNoirs, cavaliersNoirs, fousNoirs, toursNoires, reineNoire, roiNoir,
-                trait, roqueBlancRoi, roqueBlancReine, roqueNoirRoi, roqueNoirReine, enPassant);
+        EtatPlateau s = sauvegarderEtat();
         jouerSansSauvegarde(coup);
         return s;
     }

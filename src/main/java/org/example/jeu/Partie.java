@@ -3,6 +3,8 @@ package org.example.jeu;
 import org.example.AI.Niveau;
 import org.example.chess.*;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Scanner;
 
@@ -15,19 +17,19 @@ import java.util.Scanner;
  * Au lancement, on demande :
  * </p>
  * <ul>
- *   <li>le mode (Humain vs Humain / Humain vs IA / IA vs IA)</li>
- *   <li>le niveau de l'IA blanche si une IA joue les Blancs</li>
- *   <li>le niveau de l'IA noire si une IA joue les Noirs</li>
+ * <li>le mode (Humain vs Humain / Humain vs IA / IA vs IA)</li>
+ * <li>le niveau de l'IA blanche si une IA joue les Blancs</li>
+ * <li>le niveau de l'IA noire si une IA joue les Noirs</li>
  * </ul>
  *
  * <p>
  * Ensuite, boucle :
  * </p>
  * <ul>
- *   <li>afficher le plateau</li>
- *   <li>choisir le coup (humain ou IA)</li>
- *   <li>jouer le coup</li>
- *   <li>tester mat/pat</li>
+ * <li>afficher le plateau</li>
+ * <li>choisir le coup (humain ou IA)</li>
+ * <li>jouer le coup</li>
+ * <li>tester mat/pat</li>
  * </ul>
  */
 public final class Partie {
@@ -47,12 +49,16 @@ public final class Partie {
     private JoueurIA iaBlanche;
     private JoueurIA iaNoire;
 
+    private List<EtatPlateau> historiqueEtats;
+
     public Partie() {
         // On initialise au lancement
     }
 
     /**
-     * <p>Lance la partie : menu + boucle de jeu.</p>
+     * <p>
+     * Lance la partie : menu + boucle de jeu.
+     * </p>
      */
     public void lancer() {
         this.scanner = new Scanner(System.in);
@@ -69,6 +75,9 @@ public final class Partie {
         if (noir == TypeJoueur.IA) {
             this.iaNoire = new JoueurIA(niveauIANoire);
         }
+
+        this.historiqueEtats = new ArrayList<>();
+        this.historiqueEtats.add(plateau.sauvegarderEtat());
 
         boucleJeu();
     }
@@ -110,7 +119,8 @@ public final class Partie {
 
     /**
      * <p>
-     * Demande le niveau pour l'IA blanche et/ou noire, seulement si ces IA existent.
+     * Demande le niveau pour l'IA blanche et/ou noire, seulement si ces IA
+     * existent.
      * </p>
      */
     private void demanderNiveauxIA() {
@@ -133,9 +143,15 @@ public final class Partie {
             String s = scanner.nextLine().trim();
 
             switch (s) {
-                case "1" -> { return Niveau.FACILE; }
-                case "2" -> { return Niveau.MOYEN; }
-                case "3" -> { return Niveau.DIFFICILE; }
+                case "1" -> {
+                    return Niveau.FACILE;
+                }
+                case "2" -> {
+                    return Niveau.MOYEN;
+                }
+                case "3" -> {
+                    return Niveau.DIFFICILE;
+                }
                 default -> System.out.println("Choix invalide.\n");
             }
         }
@@ -159,6 +175,7 @@ public final class Partie {
 
             System.out.println("Coup joué : " + coupEnAlgebriqueSimple(coup));
             plateau.jouer(coup);
+            historiqueEtats.add(plateau.sauvegarderEtat());
         }
     }
 
@@ -181,8 +198,16 @@ public final class Partie {
     }
 
     private FinDePartie verifierFin() {
+        if (historiqueEtats != null && !historiqueEtats.isEmpty()) {
+            EtatPlateau etatCourant = historiqueEtats.get(historiqueEtats.size() - 1);
+            if (Collections.frequency(historiqueEtats, etatCourant) >= 3) {
+                return FinDePartie.nulRepetition();
+            }
+        }
+
         List<Coup> coupsLegaux = GenerateurCoups.genererLegaux(plateau);
-        if (!coupsLegaux.isEmpty()) return null;
+        if (!coupsLegaux.isEmpty())
+            return null;
 
         boolean enEchec = plateau.estEnEchec(plateau.trait());
         if (enEchec) {
@@ -197,6 +222,8 @@ public final class Partie {
         System.out.println("\n" + plateau);
         if (fin.type == FinDePartie.Type.MAT) {
             System.out.println("Échec et mat ! Gagnant : " + fin.gagnant);
+        } else if (fin.type == FinDePartie.Type.NUL_REPETITION) {
+            System.out.println("🤝 Nul par triple répétition !");
         } else {
             System.out.println("🤝 Pat ! Match nul.");
         }
@@ -219,7 +246,10 @@ public final class Partie {
     }
 
     private static final class FinDePartie {
-        enum Type { MAT, PAT }
+        enum Type {
+            MAT, PAT, NUL_REPETITION
+        }
+
         final Type type;
         final Couleur gagnant;
 
@@ -234,6 +264,10 @@ public final class Partie {
 
         static FinDePartie pat() {
             return new FinDePartie(Type.PAT, null);
+        }
+
+        static FinDePartie nulRepetition() {
+            return new FinDePartie(Type.NUL_REPETITION, null);
         }
     }
 }
