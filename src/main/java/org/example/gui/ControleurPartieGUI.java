@@ -42,9 +42,15 @@ public class ControleurPartieGUI {
     private final Stack<EntreeHistorique> historique = new Stack<>();
     private final ObservableList<String> historiqueAffichage = FXCollections.observableArrayList();
 
+    // Affichage des calculs de l'IA en temps réel
+    private final ObservableList<String> calculAIAffichage = FXCollections.observableArrayList();
+
     // Avantage matériel (positif = blancs, négatif = noirs)
     private final SimpleIntegerProperty avantageMateriel = new SimpleIntegerProperty(0);
     private final SimpleStringProperty avantageMaterielTexte = new SimpleStringProperty("Égalité matérielle");
+
+    // Nom de l'ouverture courante
+    private final SimpleStringProperty nomOuverture = new SimpleStringProperty("Unknown");
 
     public ControleurPartieGUI(boolean iaBlanc, boolean iaNoir, Niveau niveauBlanc, Niveau niveauNoir) {
         this.plateau = Plateau.positionInitiale();
@@ -78,12 +84,20 @@ public class ControleurPartieGUI {
         return historiqueAffichage;
     }
 
+    public ObservableList<String> getCalculAIAffichage() {
+        return calculAIAffichage;
+    }
+
     public ReadOnlyIntegerProperty avantageMaterielProperty() {
         return avantageMateriel;
     }
 
     public ReadOnlyStringProperty avantageMaterielTexteProperty() {
         return avantageMaterielTexte;
+    }
+
+    public ReadOnlyStringProperty nomOuvertureProperty() {
+        return nomOuverture;
     }
 
     /**
@@ -194,6 +208,8 @@ public class ControleurPartieGUI {
             return;
 
         if (estTourIA()) {
+            Platform.runLater(() -> calculAIAffichage.clear());
+
             // Lancer l'IA dans un thread pour ne pas bloquer l'UI
             Task<Coup> taskIA = new Task<>() {
                 @Override
@@ -201,7 +217,8 @@ public class ControleurPartieGUI {
                     // Simuler une mini "réflexion" pour pas que ça soit instantané (optionnel)
                     Thread.sleep(100);
                     Niveau niveauCourant = (plateau.trait() == Couleur.BLANC) ? niveauIABlanc : niveauIANoir;
-                    return RechercheMinimaxAlphaBeta.meilleurCoup(plateau, niveauCourant, profiler);
+                    return RechercheMinimaxAlphaBeta.meilleurCoup(plateau, niveauCourant, profiler,
+                            info -> Platform.runLater(() -> calculAIAffichage.add(info)));
                 }
             };
 
@@ -227,6 +244,8 @@ public class ControleurPartieGUI {
         List<Coup> legauxAvantCoup = GenerateurCoups.genererLegaux(plateau);
         String notationSAN = NotationEchecs.versSAN(plateau, coup, legauxAvantCoup);
 
+        RechercheMinimaxAlphaBeta.verifierOuverture(plateau, legauxAvantCoup, coup);
+
         // Sauvegarde pour undo
         // Attention : Plateau.jouerAvecSauvegarde joue le coup et retourne l'état
         // AVANT.
@@ -238,6 +257,9 @@ public class ControleurPartieGUI {
 
         // Note: jouerAvecSauvegarde a DEJA joué le coup.
         dernierCoupJoue = coup;
+
+        // Incrémenter le compteur de ply pour le livre d'ouvertures
+        RechercheMinimaxAlphaBeta.incrementPly();
 
         // Après avoir joué, on met à jour la vue
         rafraichirVue();
@@ -330,6 +352,7 @@ public class ControleurPartieGUI {
             vue.rafraichir(plateau, selection, dernierCoupJoue, coupsPossibles);
             mettreAJourHistoriqueAffichage();
             mettreAJourAvantageMateriel();
+            nomOuverture.set(RechercheMinimaxAlphaBeta.getCurrentOpeningName());
         });
     }
 
@@ -365,7 +388,7 @@ public class ControleurPartieGUI {
                 Piece.PION_NOIR, 1,
                 Piece.CAVALIER_NOIR, 3,
                 Piece.FOU_NOIR, 3,
-                Piece.TOUR_NOIR, 5,
+                Piece.TOUR_NOIRE, 5,
                 Piece.DAME_NOIRE, 9);
 
         int ecart = scoreBlanc - scoreNoir;

@@ -20,7 +20,7 @@ public final class GamePhase {
         int dames = EvaluationUtils.compter(p.bitboard(Piece.DAME_BLANCHE))
                 + EvaluationUtils.compter(p.bitboard(Piece.DAME_NOIRE));
         int tours = EvaluationUtils.compter(p.bitboard(Piece.TOUR_BLANC))
-                + EvaluationUtils.compter(p.bitboard(Piece.TOUR_NOIR));
+                + EvaluationUtils.compter(p.bitboard(Piece.TOUR_NOIRE));
         int fous = EvaluationUtils.compter(p.bitboard(Piece.FOU_BLANC))
                 + EvaluationUtils.compter(p.bitboard(Piece.FOU_NOIR));
         int cavaliers = EvaluationUtils.compter(p.bitboard(Piece.CAVALIER_BLANC))

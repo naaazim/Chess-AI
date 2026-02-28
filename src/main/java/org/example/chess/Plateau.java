@@ -270,7 +270,7 @@ public final class Plateau {
             case PION_NOIR -> pionsNoirs;
             case CAVALIER_NOIR -> cavaliersNoirs;
             case FOU_NOIR -> fousNoirs;
-            case TOUR_NOIR -> toursNoires;
+            case TOUR_NOIRE -> toursNoires;
             case DAME_NOIRE -> reineNoire;
             case ROI_NOIR -> roiNoir;
         };
@@ -312,7 +312,7 @@ public final class Plateau {
         if ((fousNoirs & b) != 0)
             return Piece.FOU_NOIR;
         if ((toursNoires & b) != 0)
-            return Piece.TOUR_NOIR;
+            return Piece.TOUR_NOIRE;
         if ((reineNoire & b) != 0)
             return Piece.DAME_NOIRE;
         if ((roiNoir & b) != 0)
@@ -622,7 +622,7 @@ public final class Plateau {
             case PION_NOIR -> pionsNoirs = (pionsNoirs & ~depart) | arrivee;
             case CAVALIER_NOIR -> cavaliersNoirs = (cavaliersNoirs & ~depart) | arrivee;
             case FOU_NOIR -> fousNoirs = (fousNoirs & ~depart) | arrivee;
-            case TOUR_NOIR -> toursNoires = (toursNoires & ~depart) | arrivee;
+            case TOUR_NOIRE -> toursNoires = (toursNoires & ~depart) | arrivee;
             case DAME_NOIRE -> reineNoire = (reineNoire & ~depart) | arrivee;
             case ROI_NOIR -> roiNoir = (roiNoir & ~depart) | arrivee;
         }
@@ -640,7 +640,7 @@ public final class Plateau {
             case PION_NOIR -> pionsNoirs |= masque;
             case CAVALIER_NOIR -> cavaliersNoirs |= masque;
             case FOU_NOIR -> fousNoirs |= masque;
-            case TOUR_NOIR -> toursNoires |= masque;
+            case TOUR_NOIRE -> toursNoires |= masque;
             case DAME_NOIRE -> reineNoire |= masque;
             case ROI_NOIR -> roiNoir |= masque;
         }
@@ -658,7 +658,7 @@ public final class Plateau {
             case PION_NOIR -> pionsNoirs &= ~masque;
             case CAVALIER_NOIR -> cavaliersNoirs &= ~masque;
             case FOU_NOIR -> fousNoirs &= ~masque;
-            case TOUR_NOIR -> toursNoires &= ~masque;
+            case TOUR_NOIRE -> toursNoires &= ~masque;
             case DAME_NOIRE -> reineNoire &= ~masque;
             case ROI_NOIR -> roiNoir &= ~masque;
         }
@@ -698,7 +698,7 @@ public final class Plateau {
                 roqueBlancRoi = false; // h1
             if (dep == 56)
                 roqueBlancReine = false; // a1
-        } else if (piece == Piece.TOUR_NOIR) {
+        } else if (piece == Piece.TOUR_NOIRE) {
             if (dep == 7)
                 roqueNoirRoi = false; // h8
             if (dep == 0)

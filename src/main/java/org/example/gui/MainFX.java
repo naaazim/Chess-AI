@@ -11,6 +11,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.ToggleGroup;
+import javafx.scene.image.Image;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
@@ -26,7 +27,15 @@ public class MainFX extends Application {
     @Override
     public void start(Stage primaryStage) {
         this.primaryStage = primaryStage;
-        this.primaryStage.setTitle("Deep black");
+        this.primaryStage.setTitle("DEEP BLACK");
+
+        // Définir le logo de la fenêtre
+        try {
+            Image fxImage = new Image(getClass().getResourceAsStream("/logo.png"));
+            this.primaryStage.getIcons().add(fxImage);
+        } catch (Exception e) {
+            System.err.println("Impossible de charger le logo: " + e.getMessage());
+        }
 
         montrerMenuPrincipal();
     }
@@ -210,13 +219,29 @@ public class MainFX extends Application {
         ListView<String> listeHistorique = new ListView<>();
         listeHistorique.setItems(controleur.getHistoriqueAffichage());
         listeHistorique.setFocusTraversable(false);
-        listeHistorique.setPrefHeight(420);
+        listeHistorique.setPrefHeight(180);
         listeHistorique.getStyleClass().add("history-list");
         VBox.setVgrow(listeHistorique, Priority.ALWAYS);
 
         controleur.getHistoriqueAffichage().addListener((ListChangeListener<String>) change -> {
             if (!controleur.getHistoriqueAffichage().isEmpty()) {
                 listeHistorique.scrollTo(controleur.getHistoriqueAffichage().size() - 1);
+            }
+        });
+
+        Label titreCalculIA = new Label("Calculs IA en direct");
+        titreCalculIA.getStyleClass().add("side-panel-title");
+
+        ListView<String> listeCalculIA = new ListView<>();
+        listeCalculIA.setItems(controleur.getCalculAIAffichage());
+        listeCalculIA.setFocusTraversable(false);
+        listeCalculIA.setPrefHeight(180);
+        listeCalculIA.getStyleClass().add("history-list");
+        VBox.setVgrow(listeCalculIA, Priority.ALWAYS);
+
+        controleur.getCalculAIAffichage().addListener((ListChangeListener<String>) change -> {
+            if (!controleur.getCalculAIAffichage().isEmpty()) {
+                listeCalculIA.scrollTo(controleur.getCalculAIAffichage().size() - 1);
             }
         });
 
@@ -230,7 +255,17 @@ public class MainFX extends Application {
         controleur.avantageMaterielProperty()
                 .addListener((obs, oldVal, newVal) -> appliquerStyleAvantage(lblAvantage, newVal.intValue()));
 
-        panneau.getChildren().addAll(titreHistorique, listeHistorique, titreAvantage, lblAvantage);
+        // Opening name display
+        Label titreOuverture = new Label("Opening");
+        titreOuverture.getStyleClass().add("side-panel-title");
+
+        Label lblOuverture = new Label("");
+        lblOuverture.getStyleClass().add("advantage-value");
+        // Desactive l'affichage du nom d'ouverture pour le moment
+        // lblOuverture.textProperty().bind(controleur.nomOuvertureProperty());
+
+        panneau.getChildren().addAll(titreHistorique, listeHistorique, titreCalculIA, listeCalculIA, titreAvantage,
+                lblAvantage);
         return panneau;
     }
 

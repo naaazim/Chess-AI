@@ -84,7 +84,7 @@ public final class JoueurHumain {
     private boolean promotionCorrespond(Coup c, char promo, Couleur trait) {
         Piece attendue = switch (promo) {
             case 'q' -> (trait == Couleur.BLANC) ? Piece.DAME_BLANCHE : Piece.DAME_NOIRE;
-            case 'r' -> (trait == Couleur.BLANC) ? Piece.TOUR_BLANC : Piece.TOUR_NOIR;
+            case 'r' -> (trait == Couleur.BLANC) ? Piece.TOUR_BLANC : Piece.TOUR_NOIRE;
             case 'b' -> (trait == Couleur.BLANC) ? Piece.FOU_BLANC : Piece.FOU_NOIR;
             case 'n' -> (trait == Couleur.BLANC) ? Piece.CAVALIER_BLANC : Piece.CAVALIER_NOIR;
             default -> null;

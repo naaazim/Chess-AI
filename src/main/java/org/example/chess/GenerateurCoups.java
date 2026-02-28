@@ -273,7 +273,7 @@ public final class GenerateurCoups {
                                           boolean enPassant) {
 
         Piece dame = (pion == Piece.PION_BLANC) ? Piece.DAME_BLANCHE : Piece.DAME_NOIRE;
-        Piece tour = (pion == Piece.PION_BLANC) ? Piece.TOUR_BLANC : Piece.TOUR_NOIR;
+        Piece tour = (pion == Piece.PION_BLANC) ? Piece.TOUR_BLANC : Piece.TOUR_NOIRE;
         Piece fou  = (pion == Piece.PION_BLANC) ? Piece.FOU_BLANC  : Piece.FOU_NOIR;
         Piece cav  = (pion == Piece.PION_BLANC) ? Piece.CAVALIER_BLANC : Piece.CAVALIER_NOIR;
 
@@ -365,13 +365,13 @@ public final class GenerateurCoups {
     private static void genererCoupsTours(Plateau plateau, Couleur trait, List<Coup> coups) {
         long tours = (trait == Couleur.BLANC)
                 ? plateau.bitboard(Piece.TOUR_BLANC)
-                : plateau.bitboard(Piece.TOUR_NOIR);
+                : plateau.bitboard(Piece.TOUR_NOIRE);
 
         long allies = (trait == Couleur.BLANC) ? plateau.blancs() : plateau.noirs();
         long ennemis = (trait == Couleur.BLANC) ? plateau.noirs() : plateau.blancs();
 
         long occ = plateau.occupes();
-        Piece piece = (trait == Couleur.BLANC) ? Piece.TOUR_BLANC : Piece.TOUR_NOIR;
+        Piece piece = (trait == Couleur.BLANC) ? Piece.TOUR_BLANC : Piece.TOUR_NOIRE;
 
         long tmp = tours;
         while (tmp != 0L) {
@@ -515,7 +515,7 @@ public final class GenerateurCoups {
 
             // Petit roque noir : e8 -> g8
             if (plateau.getRoqueNoirRoi()) {
-                boolean tourPresente = (plateau.bitboard(Piece.TOUR_NOIR) & (1L << 7)) != 0L;
+                boolean tourPresente = (plateau.bitboard(Piece.TOUR_NOIRE) & (1L << 7)) != 0L;
                 boolean casesVides = ((occ & ((1L << 5) | (1L << 6))) == 0L);
                 boolean casesSafe = ((attaquesAdv & ((1L << 5) | (1L << 6))) == 0L);
 
@@ -526,7 +526,7 @@ public final class GenerateurCoups {
 
             // Grand roque noir : e8 -> c8
             if (plateau.getRoqueNoirReine()) {
-                boolean tourPresente = (plateau.bitboard(Piece.TOUR_NOIR) & (1L << 0)) != 0L;
+                boolean tourPresente = (plateau.bitboard(Piece.TOUR_NOIRE) & (1L << 0)) != 0L;
                 boolean casesVides = ((occ & ((1L << 1) | (1L << 2) | (1L << 3))) == 0L);
                 boolean casesSafe = ((attaquesAdv & ((1L << 3) | (1L << 2))) == 0L);
 

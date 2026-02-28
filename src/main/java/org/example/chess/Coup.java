@@ -107,6 +107,35 @@ public final class Coup {
         return enPassant;
     }
 
+    /**
+     * Crée un coup depuis deux indices de cases (0-63).
+     * Utile pour le livre d'ouvertures.
+     * @param fromIdx indice de départ (0=a8, 63=h1)
+     * @param toIdx indice d'arrivée
+     * @param promoCode 0=pas promotion, 1=dame, 2=tour, 3=fou, 4=cavalier
+     */
+    public static Coup depuisIndices(int fromIdx, int toIdx, int promoCode) {
+        Case depart = Case.depuisIndice(fromIdx);
+        Case arrivee = Case.depuisIndice(toIdx);
+
+        Piece promotion = null;
+        boolean promo = promoCode > 0;
+        if (promo) {
+            promotion = switch (promoCode) {
+                case 1 -> Piece.DAME_BLANCHE;
+                case 2 -> Piece.TOUR_BLANC;
+                case 3 -> Piece.FOU_BLANC;
+                case 4 -> Piece.CAVALIER_BLANC;
+                default -> null;
+            };
+        }
+
+        // Placeholder - la piece sera determined lors de la validation
+        // Utiliser un pion comme placeholder (sera ignore si coup illegal)
+        Piece placeholderPiece = Piece.PION_BLANC;
+        return new Coup(depart, arrivee, placeholderPiece, false, null, promo, promotion, false, false);
+    }
+
     public boolean caseArriveeContientPiece(Plateau plateau) {
         return plateau.estOccupe(arrivee);
     }

@@ -52,7 +52,7 @@ public final class MoveSorter {
             case PION_BLANC, PION_NOIR -> Evaluation.VALEUR_PION;
             case CAVALIER_BLANC, CAVALIER_NOIR -> Evaluation.VALEUR_CAVALIER;
             case FOU_BLANC, FOU_NOIR -> Evaluation.VALEUR_FOU;
-            case TOUR_BLANC, TOUR_NOIR -> Evaluation.VALEUR_TOUR;
+            case TOUR_BLANC, TOUR_NOIRE -> Evaluation.VALEUR_TOUR;
             case DAME_BLANCHE, DAME_NOIRE -> Evaluation.VALEUR_DAME;
             case ROI_BLANC, ROI_NOIR -> 0;
         };

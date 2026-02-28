@@ -17,7 +17,7 @@ public enum Piece {
     PION_NOIR('p'),
     CAVALIER_NOIR('n'),
     FOU_NOIR('b'),
-    TOUR_NOIR('r'),
+    TOUR_NOIRE('r'),
     DAME_NOIRE('q'),
     ROI_NOIR('k');
 

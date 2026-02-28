@@ -235,7 +235,7 @@ public final class Partie {
             Piece promo = c.piecePromotion();
             char lettre = switch (promo) {
                 case DAME_BLANCHE, DAME_NOIRE -> 'q';
-                case TOUR_BLANC, TOUR_NOIR -> 'r';
+                case TOUR_BLANC, TOUR_NOIRE -> 'r';
                 case FOU_BLANC, FOU_NOIR -> 'b';
                 case CAVALIER_BLANC, CAVALIER_NOIR -> 'n';
                 default -> '?';

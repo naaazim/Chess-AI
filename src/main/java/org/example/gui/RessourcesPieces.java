@@ -39,7 +39,7 @@ public class RessourcesPieces {
         chargerImage(Piece.PION_BLANC, "pion_blanc.png");
         chargerImage(Piece.ROI_NOIR, "roi_noir.png");
         chargerImage(Piece.DAME_NOIRE, "reine_noire.png");
-        chargerImage(Piece.TOUR_NOIR, "tour_noire.png");
+        chargerImage(Piece.TOUR_NOIRE, "tour_noire.png");
         chargerImage(Piece.FOU_NOIR, "fou_noir.png");
         chargerImage(Piece.CAVALIER_NOIR, "cavalier_noir.png");
         chargerImage(Piece.PION_NOIR, "pion_noir.png");

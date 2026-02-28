@@ -21,7 +21,7 @@ public final class Materiel {
         noirs += EvaluationUtils.compter(p.bitboard(Piece.PION_NOIR)) * Evaluation.VALEUR_PION;
         noirs += EvaluationUtils.compter(p.bitboard(Piece.CAVALIER_NOIR)) * Evaluation.VALEUR_CAVALIER;
         noirs += EvaluationUtils.compter(p.bitboard(Piece.FOU_NOIR)) * Evaluation.VALEUR_FOU;
-        noirs += EvaluationUtils.compter(p.bitboard(Piece.TOUR_NOIR)) * Evaluation.VALEUR_TOUR;
+        noirs += EvaluationUtils.compter(p.bitboard(Piece.TOUR_NOIRE)) * Evaluation.VALEUR_TOUR;
         noirs += EvaluationUtils.compter(p.bitboard(Piece.DAME_NOIRE)) * Evaluation.VALEUR_DAME;
 
         return blancs - noirs;
