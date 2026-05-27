@@ -1,0 +1,1168 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="dark">
+<head>
+    <script>
+        (function(){var t=localStorage.getItem('db-theme');document.documentElement.setAttribute('data-theme',t==='light'?'light':'dark');}());
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Documentation - DEEP BLACK</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+
+        /* ── VARIABLES ── */
+        [data-theme="dark"] {
+            --bg:        #080808;
+            --bg-card:   #0e0e0e;
+            --bg-hover:  #161616;
+            --bg-active: #1e1e1e;
+            --border:    rgba(255,255,255,0.065);
+            --border-h:  rgba(255,255,255,0.13);
+            --text:      #f0f0f0;
+            --text-2:    #909090;
+            --text-3:    #3e3e3e;
+            --accent:    #fff;
+            --acc-inv:   #000;
+            --mono:      #7eb8f7;
+            --mono-bg:   #0d1b2e;
+            --grid:      rgba(255,255,255,0.018);
+            --badge-class-bg:#071a08;  --badge-class-c:#4ade80;
+            --badge-enum-bg:#1a0f00;   --badge-enum-c:#fb923c;
+            --badge-iface-bg:#080820;  --badge-iface-c:#818cf8;
+            --badge-rec-bg:#120820;    --badge-rec-c:#c084fc;
+            --badge-exc-bg:#1a0808;    --badge-exc-c:#f87171;
+        }
+        [data-theme="light"] {
+            --bg:        #f5f5f3;
+            --bg-card:   #ffffff;
+            --bg-hover:  #ececec;
+            --bg-active: #e4e4e4;
+            --border:    rgba(0,0,0,0.07);
+            --border-h:  rgba(0,0,0,0.15);
+            --text:      #111111;
+            --text-2:    #3d3d3d;
+            --text-3:    #a0a0a0;
+            --accent:    #0f0f0f;
+            --acc-inv:   #fff;
+            --mono:      #0550ae;
+            --mono-bg:   #eef4ff;
+            --grid:      rgba(0,0,0,0.025);
+            --badge-class-bg:#dcfce7;  --badge-class-c:#15803d;
+            --badge-enum-bg:#ffedd5;   --badge-enum-c:#c2410c;
+            --badge-iface-bg:#e0e7ff;  --badge-iface-c:#4338ca;
+            --badge-rec-bg:#f3e8ff;    --badge-rec-c:#7e22ce;
+            --badge-exc-bg:#fee2e2;    --badge-exc-c:#b91c1c;
+        }
+
+        /* ── BASE ── */
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        html { height: 100%; -webkit-font-smoothing: antialiased; }
+        body {
+            font-family: 'DM Sans', -apple-system, sans-serif;
+            font-size: 15px;
+            background: var(--bg); color: var(--text);
+            height: 100%; display: flex; flex-direction: column; overflow: hidden;
+        }
+        a { color: inherit; text-decoration: none; }
+        ::selection { background: var(--accent); color: var(--acc-inv); }
+
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--border-h); border-radius: 2px; }
+
+        code {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: .82em;
+            background: var(--mono-bg);
+            padding: 2px 6px; border-radius: 5px;
+            color: var(--mono);
+            letter-spacing: -.01em;
+        }
+
+        /* ── NAVBAR ── */
+        .nav {
+            flex-shrink: 0; height: 52px;
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 20px;
+            background: var(--bg-card);
+            border-bottom: 1px solid var(--border);
+            z-index: 200;
+        }
+        .nav-left  { display: flex; align-items: center; gap: 6px; min-width: 0; }
+        .nav-back {
+            display: flex; align-items: center; gap: 5px;
+            font-size: 13px; font-weight: 400; color: var(--text-2);
+            padding: 5px 8px; border-radius: 7px;
+            transition: background 130ms, color 130ms; white-space: nowrap;
+        }
+        .nav-back:hover { background: var(--bg-hover); color: var(--text); }
+        .nav-back svg { width: 13px; height: 13px; }
+        .nav-sep { color: var(--border-h); font-size: 16px; user-select: none; flex-shrink: 0; }
+        .nav-cur {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 13px; font-weight: 600; color: var(--text);
+            overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+        }
+        .nav-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+
+        .theme-btn {
+            width: 34px; height: 34px;
+            display: flex; align-items: center; justify-content: center;
+            border-radius: 8px; border: 1px solid var(--border-h);
+            background: transparent; cursor: pointer; color: var(--text-2);
+            transition: background 130ms, color 130ms;
+        }
+        .theme-btn:hover { background: var(--bg-hover); color: var(--text); }
+        .theme-btn svg { width: 15px; height: 15px; }
+        .icon-sun  { display: none; }
+        .icon-moon { display: block; }
+        [data-theme="light"] .icon-sun  { display: block; }
+        [data-theme="light"] .icon-moon { display: none; }
+
+        .menu-btn {
+            display: none; align-items: center; justify-content: center;
+            width: 34px; height: 34px; border-radius: 8px;
+            border: 1px solid var(--border-h); background: transparent;
+            cursor: pointer; color: var(--text-2);
+            transition: background 130ms;
+        }
+        .menu-btn:hover { background: var(--bg-hover); color: var(--text); }
+        .menu-btn svg { width: 15px; height: 15px; }
+        @media (max-width: 720px) { .menu-btn { display: flex; } }
+
+        /* ── LAYOUT ── */
+        .layout { flex: 1; display: flex; overflow: hidden; min-height: 0; }
+
+        /* ── SIDEBAR ── */
+        .sidebar {
+            width: 256px; flex-shrink: 0;
+            background: var(--bg-card);
+            border-right: 1px solid var(--border);
+            display: flex; flex-direction: column; overflow: hidden;
+        }
+        @media (max-width: 720px) {
+            .sidebar {
+                position: fixed; top: 52px; left: 0; bottom: 0; z-index: 150;
+                transform: translateX(-100%);
+                transition: transform 240ms cubic-bezier(0.16,1,0.3,1);
+                box-shadow: 4px 0 28px rgba(0,0,0,0.35);
+            }
+            .sidebar.open { transform: translateX(0); }
+        }
+
+        .sb-head {
+            padding: 16px 16px 12px;
+            border-bottom: 1px solid var(--border);
+            flex-shrink: 0;
+        }
+        .sb-brand {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 9px; font-weight: 700; letter-spacing: .2em;
+            text-transform: uppercase; color: var(--text-3); margin-bottom: 3px;
+        }
+        .sb-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 13px; font-weight: 600; color: var(--text);
+        }
+
+        .sb-search { padding: 10px 10px; border-bottom: 1px solid var(--border); flex-shrink: 0; position: relative; }
+        .sb-search-ico {
+            position: absolute; left: 19px; top: 50%; transform: translateY(-50%);
+            width: 13px; height: 13px; color: var(--text-3); pointer-events: none;
+        }
+        .sb-input {
+            width: 100%; background: var(--bg-hover);
+            border: 1px solid var(--border); border-radius: 8px;
+            padding: 7px 8px 7px 30px;
+            font-size: 13px; font-family: 'DM Sans', sans-serif;
+            color: var(--text); outline: none;
+            transition: border-color 130ms;
+        }
+        .sb-input::placeholder { color: var(--text-3); }
+        .sb-input:focus { border-color: var(--border-h); }
+
+        .sb-nav { flex: 1; overflow-y: auto; padding: 8px 0 24px; }
+
+        .pkg-grp { margin-bottom: 2px; }
+        .pkg-toggle {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 10px 14px 6px; cursor: pointer; user-select: none;
+        }
+        .pkg-name {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 11px; font-weight: 600; letter-spacing: .08em;
+            text-transform: uppercase; color: var(--text-2);
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+            max-width: 180px;
+        }
+        .pkg-chev { width: 9px; height: 9px; color: var(--text-3); transition: transform 160ms; flex-shrink: 0; }
+        .pkg-grp.open .pkg-chev { transform: rotate(90deg); }
+        .pkg-grp.open .pkg-name { color: var(--text); }
+        .pkg-cls { display: none; padding: 2px 0; }
+        .pkg-grp.open .pkg-cls { display: block; }
+
+        .cls-item {
+            display: flex; align-items: center; gap: 8px;
+            padding: 5px 12px 5px 20px;
+            font-size: 13px; font-weight: 400; color: var(--text-2);
+            cursor: pointer; border-radius: 7px; margin: 1px 6px;
+            transition: background 100ms, color 100ms;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .cls-item:hover { background: var(--bg-hover); color: var(--text); }
+        .cls-item.active {
+            background: var(--bg-active); color: var(--text); font-weight: 500;
+        }
+        .cls-dot {
+            width: 5px; height: 5px; border-radius: 50%;
+            background: var(--text-2); flex-shrink: 0; opacity: 0;
+            transition: opacity 150ms;
+        }
+        .cls-item.active .cls-dot { opacity: 1; background: var(--accent); }
+        .cls-item.hidden { display: none; }
+
+        /* ── CONTENT ── */
+        .content {
+            flex: 1; overflow-y: auto;
+            padding: 52px 68px;
+            background: var(--bg);
+            background-image:
+                linear-gradient(var(--grid) 1px, transparent 1px),
+                linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+            background-size: 48px 48px;
+        }
+        @media (max-width: 960px) { .content { padding: 32px 24px; } }
+
+        /* ── HOME PAGE ── */
+        .doc-home { max-width: 720px; }
+        .doc-home-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 34px; font-weight: 700; letter-spacing: -.04em;
+            color: var(--text); margin-bottom: 10px;
+        }
+        .doc-home-sub {
+            font-size: 15px; color: var(--text-2);
+            line-height: 1.8; margin-bottom: 40px;
+        }
+
+        .pkg-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+        .pkg-table th {
+            text-align: left; padding: 8px 14px;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
+            color: var(--text-3); background: var(--bg-card); border-bottom: 1px solid var(--border);
+        }
+        .pkg-table td {
+            padding: 12px 14px; border-bottom: 1px solid var(--border);
+            vertical-align: top; line-height: 1.6;
+        }
+        .pkg-table td:first-child {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px; color: var(--text-2); white-space: nowrap;
+        }
+        .pkg-table td:last-child { color: var(--text-3); font-size: 12px; white-space: nowrap; }
+        .pkg-table tr { cursor: pointer; transition: background 100ms; }
+        .pkg-table tr:hover td { background: var(--bg-hover); }
+
+        /* ── CLASS PAGE ── */
+        @keyframes classIn { from { opacity:0; transform:translateY(10px) } to { opacity:1; transform:none } }
+        @keyframes rowIn   { from { opacity:0; transform:translateX(-6px) } to { opacity:1; transform:none } }
+        .class-page { max-width: 860px; animation: classIn 200ms cubic-bezier(0.16,1,0.3,1) both; }
+
+        .dt tbody tr {
+            animation: rowIn 260ms cubic-bezier(0.16,1,0.3,1) both;
+        }
+        .dt tbody tr:nth-child(1)  { animation-delay:  40ms }
+        .dt tbody tr:nth-child(2)  { animation-delay:  70ms }
+        .dt tbody tr:nth-child(3)  { animation-delay: 100ms }
+        .dt tbody tr:nth-child(4)  { animation-delay: 130ms }
+        .dt tbody tr:nth-child(5)  { animation-delay: 160ms }
+        .dt tbody tr:nth-child(6)  { animation-delay: 190ms }
+        .dt tbody tr:nth-child(7)  { animation-delay: 220ms }
+        .dt tbody tr:nth-child(8)  { animation-delay: 250ms }
+        .dt tbody tr:nth-child(n+9){ animation-delay: 280ms }
+
+        .class-crumb {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px; color: var(--text-3);
+            margin-bottom: 14px; letter-spacing: .01em;
+        }
+        .class-hd {
+            display: flex; align-items: baseline; gap: 12px;
+            flex-wrap: wrap; margin-bottom: 6px;
+        }
+        .class-name {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: clamp(26px,3.5vw,40px); font-weight: 700;
+            letter-spacing: -.04em; color: var(--text);
+        }
+
+        .badge {
+            display: inline-flex; align-items: center;
+            padding: 4px 12px; border-radius: 100px;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 10px; font-weight: 700; letter-spacing: .06em;
+            text-transform: uppercase; flex-shrink: 0;
+        }
+        .badge-class     { background: var(--badge-class-bg); color: var(--badge-class-c); }
+        .badge-enum      { background: var(--badge-enum-bg);  color: var(--badge-enum-c); }
+        .badge-interface { background: var(--badge-iface-bg); color: var(--badge-iface-c); }
+        .badge-record    { background: var(--badge-rec-bg);   color: var(--badge-rec-c); }
+        .badge-exception { background: var(--badge-exc-bg);   color: var(--badge-exc-c); }
+
+        .class-decl {
+            margin: 18px 0 22px;
+            background: var(--bg-card);
+            border-left: 2px solid var(--border-h);
+            border-radius: 0 10px 10px 0;
+            padding: 13px 18px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12.5px; color: var(--text-2);
+            word-break: break-word; overflow-wrap: break-word; line-height: 1.6;
+        }
+
+        .class-desc {
+            font-size: 15px; line-height: 1.88;
+            color: var(--text); max-width: 740px;
+            margin-bottom: 36px;
+            font-weight: 400;
+        }
+        .class-desc code { font-size: .83em; }
+
+        /* ── SECTIONS (champs/méthodes) ── */
+        .cs { margin-bottom: 30px; }
+        .cs-head {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 10px; font-weight: 700; letter-spacing: .12em;
+            text-transform: uppercase; color: var(--text-3);
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border); margin-bottom: 12px;
+        }
+
+        .dt { width: 100%; border-collapse: collapse; font-size: 13px; }
+        .dt th {
+            text-align: left; padding: 7px 12px;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+            color: var(--text-3); background: var(--bg-card); border-bottom: 1px solid var(--border);
+        }
+        .dt td {
+            padding: 10px 12px; border-bottom: 1px solid var(--border);
+            vertical-align: top; line-height: 1.7; color: var(--text);
+        }
+        .dt tr:hover td { background: var(--bg-hover); }
+
+        .td-t {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11.5px; color: var(--text-2); white-space: nowrap;
+        }
+        .td-n {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11.5px; color: var(--mono);
+        }
+        .td-s {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11.5px; color: var(--text-2); word-break: break-word; overflow-wrap: break-word; line-height: 1.6;
+        }
+        /* syntax colors */
+        .sk { color: #818cf8; } /* keyword: void static int boolean … */
+        .st { color: var(--mono); } /* type name */
+        .sm { color: var(--text); } /* method name */
+        .sp { color: var(--text); } /* punctuation */
+        .sv { color: #fb923c; } /* value: null true false */
+        /* also use for class-decl */
+        .class-decl .sk { color: #818cf8; }
+        .class-decl .st { color: var(--mono); }
+        .class-decl .sm { color: var(--text); }
+
+        /* ── DÉPENDANCES ── */
+        .deps { display: flex; flex-wrap: wrap; gap: 7px; }
+        .dep {
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: 7px; padding: 4px 12px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px; color: var(--text-2); cursor: pointer;
+            transition: background 130ms, color 130ms, border-color 130ms;
+        }
+        .dep:hover { background: var(--bg-active); color: var(--text); border-color: var(--border-h); }
+
+        /* ── OVERLAY MOBILE ── */
+        .mob-overlay {
+            display: none; position: fixed; inset: 0; z-index: 140;
+            background: rgba(0,0,0,0.55); backdrop-filter: blur(4px);
+        }
+
+    </style>
+</head>
+<body>
+
+<nav class="nav">
+    <div class="nav-left">
+        <button class="menu-btn" id="menuBtn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+            </svg>
+        </button>
+        <a href="index.html" class="nav-back">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+            Accueil
+        </a>
+        <span class="nav-sep">/</span>
+        <span class="nav-cur" id="navCur">Documentation</span>
+    </div>
+    <div class="nav-right">
+        <button class="theme-btn" id="themeBtn" aria-label="Thème">
+            <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+            </svg>
+            <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <circle cx="12" cy="12" r="5"/>
+                <line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
+                <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+                <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
+                <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+            </svg>
+        </button>
+    </div>
+</nav>
+
+<div class="mob-overlay" id="mobOverlay"></div>
+
+<div class="layout">
+    <aside class="sidebar" id="sidebar">
+        <div class="sb-head">
+            <div class="sb-brand">Deep Black</div>
+            <div class="sb-title">Documentation</div>
+        </div>
+        <div class="sb-search">
+            <svg class="sb-search-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+            <input class="sb-input" id="searchInput" type="text" placeholder="Rechercher une classe…" autocomplete="off">
+        </div>
+        <nav class="sb-nav" id="sbNav"></nav>
+    </aside>
+
+    <main class="content" id="mainContent"></main>
+</div>
+
+<script>
+    var PACKAGES=[
+        {id:"plateau",name:"fr.moteurechecs.plateau",role:"Représentation bitboard, génération de coups, règles du jeu",classes:[
+            {id:"Plateau",name:"Plateau",type:"class",pkg:"fr.moteurechecs.plateau",decl:"public final class Plateau",
+                desc:"Classe centrale du moteur. Représente une position d'échecs à l'aide de douze bitboards <code>long</code> (un par type de pièce et couleur) et de quatre bitboards dérivés (occupés, blancs, noirs, vides). La convention d'indexation est 0 = a8, 63 = h1 (ligne 8 en haut). Le plateau maintient le trait, les droits de roque pour chaque camp et la case en passant. Les méthodes <code>jouerAvecSauvegarde</code> et <code>annuler</code> implémentent le schéma play/unplay utilisé par le générateur de coups légaux et la recherche alpha-bêta.",
+                fields:[
+                    {type:"long",name:"pionsBlancs, cavaliersBlancs, fousBlancs, toursBlanches, reineBlanche, roiBlanc",desc:"Six bitboards des pièces blanches."},
+                    {type:"long",name:"pionsNoirs, cavaliersNoirs, fousNoirs, toursNoires, reineNoire, roiNoir",desc:"Six bitboards des pièces noires."},
+                    {type:"long",name:"occupes, blancs, noirs, vides",desc:"Bitboards dérivés recalculés après chaque coup."},
+                    {type:"Couleur",name:"trait",desc:"Joueur au trait (BLANC ou NOIR)."},
+                    {type:"boolean",name:"roqueBlancRoi, roqueBlancReine, roqueNoirRoi, roqueNoirReine",desc:"Droits de roque par camp et côté."},
+                    {type:"long",name:"enPassant",desc:"Bitboard de la case en passant cible (0 si aucune)."}
+                ],
+                methods:[
+                    {sig:"static Plateau positionInitiale()",desc:"Crée le plateau en position initiale standard."},
+                    {sig:"static Plateau depuisFEN(String fen)",desc:"Parse une chaîne FEN et retourne le plateau correspondant."},
+                    {sig:"Plateau copie()",desc:"Retourne une copie profonde indépendante — utilisée pour la recherche parallèle."},
+                    {sig:"EtatPlateau jouerAvecSauvegarde(Coup coup)",desc:"Joue le coup et retourne l'état complet avant le coup, permettant l'annulation."},
+                    {sig:"void jouerSansSauvegarde(Coup coup)",desc:"Joue le coup sans allouer d'EtatPlateau. Plus rapide, utilisé quand l'annulation n'est pas nécessaire."},
+                    {sig:"void annuler(EtatPlateau etat)",desc:"Restaure intégralement l'état du plateau tel qu'il était avant le coup."},
+                    {sig:"long bitboard(Piece piece)",desc:"Retourne le bitboard correspondant au type de pièce donné."},
+                    {sig:"Piece pieceEn(Case c)",desc:"Retourne la pièce occupant la case donnée, ou null si vide."},
+                    {sig:"boolean estEnEchec(Couleur couleur)",desc:"Teste si le roi de la couleur donnée est actuellement en échec."},
+                    {sig:"long casesAttaqueesPar(Couleur couleur)",desc:"Retourne le bitboard de toutes les cases attaquées par la couleur donnée."}
+                ],
+                deps:["Case","Coup","Piece","EtatPlateau","Couleur"]},
+            {id:"Case",name:"Case",type:"class",pkg:"fr.moteurechecs.plateau",decl:"public final class Case",
+                desc:"Représente une case de l'échiquier de façon immuable. Un tableau de 64 instances pré-allouées (patron flyweight) évite toute allocation dynamique à l'exécution. La colonne est dans [0, 7] (0 = colonne a) et la ligne dans [1, 8].",
+                fields:[{type:"static Case[]",name:"CACHE",desc:"Tableau des 64 instances pré-allouées, indexées par indice interne [0, 63]."}],
+                methods:[
+                    {sig:"static Case depuisIndice(int i)",desc:"Retourne la Case dont l'indice interne est i."},
+                    {sig:"static Case depuisColonneLigne(int col, int lig)",desc:"Crée une Case depuis une colonne [0,7] et une ligne [1,8]."},
+                    {sig:"static Case depuisAlgebrique(String alg)",desc:"Parse une notation algébrique (ex. \"e4\") et retourne la Case correspondante."},
+                    {sig:"int indice()",desc:"Retourne l'indice interne [0, 63]."},
+                    {sig:"int colonne()",desc:"Retourne la colonne [0, 7]."},
+                    {sig:"int ligne()",desc:"Retourne la ligne [1, 8]."},
+                    {sig:"String versAlgebrique()",desc:"Retourne la notation algébrique standard (ex. \"e4\")."},
+                    {sig:"long bit()",desc:"Retourne le masque de bit de la case : 1L << indice()."}
+                ],deps:[]},
+            {id:"Coup",name:"Coup",type:"class",pkg:"fr.moteurechecs.plateau",decl:"public final class Coup",
+                desc:"Représentation immuable d'un coup d'échecs. Encode la case de départ, la case d'arrivée, la pièce déplacée et les attributs spéciaux : capture (avec pièce capturée), promotion (avec pièce cible), roque, prise en passant. La méthode fabrique <code>depuisIndices</code> est utilisée par le livre d'ouvertures pour reconstruire un Coup depuis des indices bruts.",
+                fields:[
+                    {type:"Case",name:"depart",desc:"Case de départ du coup."},
+                    {type:"Case",name:"arrivee",desc:"Case d'arrivée du coup."},
+                    {type:"Piece",name:"pieceDeplacee",desc:"Pièce effectuant le déplacement."},
+                    {type:"boolean",name:"capture, promotion, roque, enPassant",desc:"Attributs spéciaux du coup."},
+                    {type:"Piece",name:"pieceCapturee, piecePromotion",desc:"Pièce capturée ou de promotion (null si inapplicable)."}
+                ],
+                methods:[
+                    {sig:"static Coup depuisIndices(int from, int to, int promo)",desc:"Fabrique un Coup depuis des indices bruts et un code de promotion."},
+                    {sig:"Case depart() / Case arrivee()",desc:"Accesseurs des cases de départ et d'arrivée."},
+                    {sig:"boolean estCapture() / estPromotion() / estRoque() / estEnPassant()",desc:"Tests des attributs spéciaux."},
+                    {sig:"Piece pieceCapturee() / piecePromotion()",desc:"Pièce capturée ou de promotion, null si non applicable."}
+                ],deps:["Case","Piece"]},
+            {id:"Piece",name:"Piece",type:"enum",pkg:"fr.moteurechecs.plateau",decl:"public enum Piece",
+                desc:"Énumération des douze types de pièces du jeu d'échecs. Chaque constante est associée à son caractère FEN (majuscule pour les blancs, minuscule pour les noirs) et à sa couleur.",
+                fields:[
+                    {type:"—",name:"PION_BLANC, CAVALIER_BLANC, FOU_BLANC, TOUR_BLANC, DAME_BLANCHE, ROI_BLANC",desc:"Six pièces blanches avec leurs caractères FEN respectifs."},
+                    {type:"—",name:"PION_NOIR, CAVALIER_NOIR, FOU_NOIR, TOUR_NOIRE, DAME_NOIRE, ROI_NOIR",desc:"Six pièces noires avec leurs caractères FEN respectifs."}
+                ],
+                methods:[
+                    {sig:"char caractereFEN()",desc:"Retourne le caractère FEN de la pièce."},
+                    {sig:"Couleur couleur()",desc:"Retourne la couleur de la pièce (BLANC ou NOIR)."}
+                ],deps:["Couleur"]},
+            {id:"Couleur",name:"Couleur",type:"enum",pkg:"fr.moteurechecs.plateau",decl:"public enum Couleur",
+                desc:"Énumération à deux valeurs représentant les deux camps. La méthode <code>inverse()</code> est utilisée intensivement dans l'évaluation, la recherche et la détection d'échec.",
+                fields:[
+                    {type:"—",name:"BLANC",desc:"Camp des pièces blanches."},
+                    {type:"—",name:"NOIR",desc:"Camp des pièces noires."}
+                ],
+                methods:[{sig:"Couleur inverse()",desc:"Retourne l'autre couleur (BLANC→NOIR, NOIR→BLANC)."}],deps:[]},
+            {id:"EtatPlateau",name:"EtatPlateau",type:"record",pkg:"fr.moteurechecs.plateau",decl:"public record EtatPlateau(long pionsBlancs, ...)",
+                desc:"Record Java immuable sauvegardant l'intégralité de l'état d'un plateau avant un coup. Contient les douze bitboards de pièces, le trait, les quatre droits de roque et la case en passant. Retourné par <code>jouerAvecSauvegarde()</code> et consommé par <code>annuler()</code>. L'égalité structurelle auto-générée est exploitée par le contrôleur GUI pour la détection de triple répétition.",
+                fields:[],methods:[],deps:["Couleur"]},
+            {id:"GenerateurCoups",name:"GenerateurCoups",type:"class",pkg:"fr.moteurechecs.plateau",decl:"public final class GenerateurCoups",
+                desc:"Utilitaire statique générant les listes de coups pseudo-légaux et légaux depuis une position donnée. Un coup pseudo-légal respecte les règles de déplacement des pièces mais peut laisser le roi en échec. Un coup légal est un pseudo-légal pour lequel le roi n'est pas en échec après le coup. La validation légale utilise le schéma play/check/unplay. Les coups spéciaux (roque, prise en passant, quatre promotions) sont tous générés.",
+                fields:[],
+                methods:[
+                    {sig:"static List<Coup> genererPseudoLegaux(Plateau plateau)",desc:"Génère tous les coups pseudo-légaux du joueur au trait."},
+                    {sig:"static List<Coup> genererLegaux(Plateau plateau)",desc:"Génère tous les coups légaux du joueur au trait via play/check/unplay."}
+                ],deps:["Plateau","Coup","Masques","Rayons","Arbitre"]},
+            {id:"Masques",name:"Masques",type:"class",pkg:"fr.moteurechecs.plateau",decl:"public final class Masques",
+                desc:"Contient les tables de masques précompilés pour les pièces à déplacement fixe (roi et cavalier). Les 128 entrées sont calculées une seule fois au chargement de la classe. Les constantes FILE_A et FILE_H servent à prévenir le débordement de colonne dans les attaques de pions.",
+                fields:[
+                    {type:"long[]",name:"ATTAQUES_ROI[64]",desc:"Masques d'attaque du roi pour les 64 cases."},
+                    {type:"long[]",name:"ATTAQUES_CAVALIER[64]",desc:"Masques d'attaque du cavalier pour les 64 cases."},
+                    {type:"long",name:"FILE_A, FILE_H",desc:"Masques des colonnes a et h pour éviter les débordements."}
+                ],
+                methods:[
+                    {sig:"static long attaquesRoi(int indice)",desc:"Retourne le masque d'attaque du roi depuis l'indice donné."},
+                    {sig:"static long attaquesCavalier(int indice)",desc:"Retourne le masque d'attaque du cavalier depuis l'indice donné."}
+                ],deps:[]},
+            {id:"Rayons",name:"Rayons",type:"class",pkg:"fr.moteurechecs.plateau",decl:"public final class Rayons",
+                desc:"Calcule les attaques des pièces glissantes (fous, tours, dames) en tenant compte des pièces bloquantes via le masque des cases occupées. L'algorithme est itératif avec des masques de bord pour éviter les débordements de colonne.",
+                fields:[],
+                methods:[
+                    {sig:"static long attaquesDiagonales(int indice, long occupes)",desc:"Calcule les cases attaquées en diagonale (fou / dame diagonale)."},
+                    {sig:"static long attaquesHorizontalesEtVerticales(int indice, long occupes)",desc:"Calcule les cases attaquées sur les rangs et colonnes (tour / dame orthogonale)."}
+                ],deps:[]},
+            {id:"Arbitre",name:"Arbitre",type:"class",pkg:"fr.moteurechecs.plateau",decl:"public final class Arbitre",
+                desc:"Utilitaire statique de validation des règles. Calcule les cases attaquées par un camp et détermine si un roi est en échec. Utilisé par le générateur de coups pour le filtrage légal et par la recherche alpha-bêta.",
+                fields:[],
+                methods:[
+                    {sig:"static boolean estEnEchec(Plateau plateau, Couleur couleur)",desc:"Retourne true si le roi de la couleur donnée est attaqué dans la position."},
+                    {sig:"static long casesAttaqueesPar(Plateau plateau, Couleur couleur)",desc:"Retourne le bitboard de toutes les cases attaquées par la couleur donnée."}
+                ],deps:["Plateau","Couleur","Masques","Rayons","Piece"]}
+        ]},
+        {id:"ia",name:"fr.moteurechecs.ia",role:"Orchestration IA, recherche IDS, évaluation heuristique, finales",classes:[
+            {id:"OrchestrateurIA",name:"OrchestrateurIA",type:"class",pkg:"fr.moteurechecs.ia",decl:"public final class OrchestrateurIA",
+                desc:"Façade principale de l'intelligence artificielle. Tous ses membres sont statiques. Orchestre un pipeline de décision à priorité stricte : (1) livre d'ouvertures si actif, (2) technique de finale gagnante, (3) roque prioritaire en phase d'ouverture, (4) recherche alpha-bêta IDS. Maintient l'état de reporting (profondeur atteinte, phase, nom d'ouverture) accessible par l'interface graphique.",
+                fields:[
+                    {type:"static final int",name:"MAX_BOOK_PLY = 20",desc:"Nombre maximal de demi-coups pour lesquels le livre d'ouvertures est consulté."},
+                    {type:"static long[]",name:"historiquePartie",desc:"Tableau des empreintes Zobrist des positions jouées (taille 512)."},
+                    {type:"static volatile boolean",name:"openingBookEnabled",desc:"Active ou désactive la consultation du livre d'ouvertures."},
+                    {type:"static volatile int",name:"lastDepthReached, lastDepthTarget",desc:"Profondeur réellement atteinte et profondeur cible de la dernière recherche."}
+                ],
+                methods:[
+                    {sig:"static Coup meilleurCoup(Plateau plateau, Niveau niveau)",desc:"Calcule le meilleur coup sans reporting."},
+                    {sig:"static Coup meilleurCoup(Plateau, Niveau, StatistiquesPartie, Consumer<String>)",desc:"Variante complète avec profiler et observateur GUI pour les mises à jour en temps réel."},
+                    {sig:"static void resetPly()",desc:"Réinitialise l'état complet pour une nouvelle partie."},
+                    {sig:"static void incrementPly() / enregistrerPosition(Plateau)",desc:"Incrémentent le compteur et enregistrent l'empreinte Zobrist dans l'historique."},
+                    {sig:"static void setOpeningBookEnabled(boolean enabled)",desc:"Active ou désactive le livre d'ouvertures à la volée."},
+                    {sig:"static String getCurrentOpeningName()",desc:"Retourne le nom de l'ouverture en cours, ou \"Unknown\"."},
+                    {sig:"static int getLastDepthReached()",desc:"Retourne la profondeur réellement atteinte lors de la dernière recherche."}
+                ],
+                deps:["Plateau","Coup","Niveau","RecherchePrincipale","Finale","SelecteurCoupLivre","GestionnairePhaseOuverture","TableDeTransposition","LivreOuvertures","StatistiquesPartie"]},
+            {id:"Evaluation",name:"Evaluation",type:"class",pkg:"fr.moteurechecs.ia",decl:"public final class Evaluation",
+                desc:"Évalue une position d'échecs en centipions (1/100 de pion). Un score positif favorise les Blancs. Le score est une interpolation linéaire entre le score de milieu de jeu et le score de finale, pondérée par le facteur de phase calculé par PhaseDeJeu. Le score de milieu de jeu intègre le matériel, la mobilité et la sécurité du roi ; le score de finale intègre le matériel, l'activité du roi et l'avancée des pions.",
+                fields:[
+                    {type:"static final int",name:"VALEUR_PION = 100",desc:"Valeur d'un pion en centipions."},
+                    {type:"static final int",name:"VALEUR_CAVALIER = 320",desc:"Valeur d'un cavalier en centipions."},
+                    {type:"static final int",name:"VALEUR_FOU = 330",desc:"Valeur d'un fou en centipions."},
+                    {type:"static final int",name:"VALEUR_TOUR = 500",desc:"Valeur d'une tour en centipions."},
+                    {type:"static final int",name:"VALEUR_DAME = 900",desc:"Valeur d'une dame en centipions."},
+                    {type:"static final int",name:"SCORE_MAT = 1_000_000",desc:"Score sentinelle représentant un mat."}
+                ],
+                methods:[{sig:"static int evaluer(Plateau plateau)",desc:"Évalue la position. Retourne 0 pour un pat, ±SCORE_MAT pour un mat, sinon le score pondéré par phase."}],
+                deps:["Plateau","PhaseDeJeu","Materiel","Mobilite","SecuriteRoi","StructurePions","TablePositionnelle","UtilitairesEvaluation","GenerateurCoups"]},
+            {id:"Niveau",name:"Niveau",type:"enum",pkg:"fr.moteurechecs.ia",decl:"public enum Niveau",
+                desc:"Énumération des trois niveaux de difficulté. Chaque niveau encapsule sa propre configuration : profondeur maximale, activation de l'élagage alpha-bêta, du tri des coups, du livre d'ouvertures, de la table de transposition, et la fonction d'évaluation associée. FACILE utilise EvaluationSimple sans alpha-bêta ni tri. MOYEN utilise EvaluationIntermediaire avec alpha-bêta et tri MVV-LVA. DIFFICILE utilise EvaluationComplete avec toutes les optimisations.",
+                fields:[
+                    {type:"—",name:"FACILE",desc:"Profondeur 3, sans alpha-bêta, sans tri, sans livre, sans TT. Évaluation simple."},
+                    {type:"—",name:"MOYEN",desc:"Profondeur 5, alpha-bêta, tri MVV-LVA, sans livre, sans TT. Évaluation intermédiaire."},
+                    {type:"—",name:"DIFFICILE",desc:"Profondeur variable (8–14), alpha-bêta, tri, livre d'ouvertures, TT. Évaluation complète."}
+                ],
+                methods:[
+                    {sig:"int profondeur()",desc:"Retourne la profondeur de recherche maximale du niveau."},
+                    {sig:"boolean useAlphaBeta() / useMoveSorting() / useOpeningBook() / useTranspositionTable()",desc:"Indiquent si les optimisations correspondantes sont activées."},
+                    {sig:"FonctionEvaluation getFonctionEvaluation()",desc:"Retourne la fonction d'évaluation associée au niveau."}
+                ],deps:["FonctionEvaluation","EvaluationSimple","EvaluationIntermediaire","EvaluationComplete"]},
+            {id:"Finale",name:"Finale",type:"class",pkg:"fr.moteurechecs.ia",decl:"public final class Finale",
+                desc:"Implémente les techniques de finales gagnantes pour les positions élémentaires Roi+Dame vs Roi (KQK), Roi+Tour vs Roi (KRK) et Roi+2Tours vs Roi (KRRK, mat de l'escalier). Lorsque l'adversaire ne possède que son roi, cette classe sélectionne le coup qui maximise un score combinant réduction de la mobilité du roi adverse, poussée vers le bord, rapprochement du roi allié et priorité aux coups d'échec. Elle évite explicitement les coups qui mèneraient au pat.",
+                fields:[{type:"static final int",name:"BONUS_MAT_RAPIDE = 5000",desc:"Bonus accordé au coup qui donne immédiatement mat."}],
+                methods:[{sig:"static Coup getCoupFinaleGagnante(Plateau plateau, List<Coup> coups, Couleur gagnant)",desc:"Retourne le meilleur coup de finale si la position est KQK, KRK ou KRRK. Retourne null sinon."}],
+                deps:["Plateau","Coup","Couleur","Piece","Arbitre","GenerateurCoups","Masques","UtilitairesEvaluation"]},
+            {id:"RecherchePrincipale",name:"RecherchePrincipale",type:"class",pkg:"fr.moteurechecs.ia",decl:"public final class RecherchePrincipale",
+                desc:"Orchestre la boucle de recherche en profondeur itérative croissante (IDS). La profondeur varie de 1 jusqu'à profMax calculé selon le niveau et la phase. Des fenêtres d'aspiration de ±50 centipions sont appliquées à partir de la profondeur 4. En cas de sortie de fenêtre, la recherche est recommencée avec la fenêtre complète. Un minuteur arrête la boucle IDS quand le budget temps est épuisé.",
+                fields:[],
+                methods:[{sig:"static ResultatIDS rechercherAvecIDS(Plateau, List<Coup>, Niveau, Consumer<String>, long[], int)",desc:"Lance la boucle IDS et retourne le meilleur coup avec ses métadonnées de reporting."}],
+                deps:["Plateau","Coup","Niveau","ParalleliseurCoups","GestionnaireTemps","PhaseDeJeu","TrieurDeCoups","Evaluation"]},
+            {id:"ParalleliseurCoups",name:"ParalleliseurCoups",type:"class",pkg:"fr.moteurechecs.ia",decl:"public final class ParalleliseurCoups",
+                desc:"Évalue les coups racines en parallèle sur un pool de threads daemon de taille égale au nombre de cœurs logiques. Chaque tâche travaille sur une copie indépendante du plateau et de l'historique Zobrist, puis appelle RecursionAlphaBeta.minimax() pour les profondeurs suivantes. Les résultats sont collectés et le coup ayant le meilleur score est retenu.",
+                fields:[{type:"static final int",name:"NB_THREADS",desc:"Nombre de threads du pool, égal à Runtime.getRuntime().availableProcessors()."}],
+                methods:[{sig:"static ResultatRecherche rechercherAUneProfondeur(Plateau, List<Coup>, int, Niveau, long[], int)",desc:"Évalue tous les coups à la profondeur donnée en parallèle et retourne le résultat."}],
+                deps:["Plateau","Coup","Niveau","RecursionAlphaBeta","ExceptionTempsDepasse","RapporteurRecherche"]},
+            {id:"GestionnaireTemps",name:"GestionnaireTemps",type:"class",pkg:"fr.moteurechecs.ia",decl:"public final class GestionnaireTemps",
+                desc:"Minuterie non bloquante pour la gestion du budget temps de recherche. Démarre un thread daemon qui positionne un AtomicBoolean à true après la durée spécifiée. La recherche alpha-bêta consulte ce signal à chaque nœud pour s'arrêter proprement. Budget par niveau : FACILE = 1 s, MOYEN = 2,5 s, DIFFICILE = 5 s.",
+                fields:[],
+                methods:[
+                    {sig:"void demarrer(long dureeMs)",desc:"Démarre la minuterie pour la durée donnée en millisecondes."},
+                    {sig:"void arreter()",desc:"Annule la minuterie et libère le thread daemon."},
+                    {sig:"boolean estEcoule()",desc:"Retourne true si le budget temps est dépassé."},
+                    {sig:"AtomicBoolean getSignal()",desc:"Retourne le signal AtomicBoolean partagé avec la recherche."}
+                ],deps:[]},
+            {id:"GestionnairePhaseOuverture",name:"GestionnairePhaseOuverture",type:"class",pkg:"fr.moteurechecs.ia",decl:"public final class GestionnairePhaseOuverture",
+                desc:"Suit l'état de la phase d'ouverture : compteur de demi-coups, activation du livre, nom de la dernière ouverture reconnue. Toutes ses méthodes sont synchronisées. La phase d'ouverture est désactivée dès que l'IA joue un coup hors livre ou que le compteur ply dépasse MAX_BOOK_PLY.",
+                fields:[],
+                methods:[
+                    {sig:"boolean shouldUseBook()",desc:"Retourne true si le livre d'ouvertures doit être consulté pour ce coup."},
+                    {sig:"void onBookMoveChosen(String openingName)",desc:"Notifie que l'IA a joué un coup du livre avec le nom d'ouverture associé."},
+                    {sig:"void onEngineMoveChosen()",desc:"Notifie que l'IA a joué un coup calculé (hors livre) ; désactive la phase d'ouverture."},
+                    {sig:"void incrementPly() / reset()",desc:"Incrémente le compteur ou réinitialise l'état pour une nouvelle partie."},
+                    {sig:"String getLastOpeningName()",desc:"Retourne le nom de la dernière ouverture reconnue."}
+                ],deps:[]},
+            {id:"SelecteurCoupLivre",name:"SelecteurCoupLivre",type:"class",pkg:"fr.moteurechecs.ia",decl:"public final class SelecteurCoupLivre",
+                desc:"Sélectionne et score les coups du livre d'ouvertures. Récupère jusqu'à 6 candidats du livre, les score selon des heuristiques d'ouverture (contrôle du centre, roque, développement, pénalités pour les pions de bord et la dame précoce), vérifie leur sécurité (chute matérielle ou d'évaluation ≥ 180 centipions) et en choisit un avec une légère diversification.",
+                fields:[
+                    {type:"static final int",name:"BONUS_CENTRE = 35",desc:"Bonus pour un coup occupant ou contrôlant les cases centrales."},
+                    {type:"static final int",name:"BONUS_ROQUE = 42",desc:"Bonus accordé au coup de roque."},
+                    {type:"static final int",name:"PENALITE_PION_BORD = 26",desc:"Pénalité pour les coups de pion de bord en ouverture."},
+                    {type:"static final int",name:"PENALITE_REINE_TOT = 30",desc:"Pénalité pour sortir la dame trop tôt."}
+                ],
+                methods:[
+                    {sig:"static Optional<Coup> chercherCoupDansLivre(Plateau, List<Coup>, Niveau, GestionnairePhaseOuverture, boolean)",desc:"Recherche un coup dans le livre, le score, vérifie sa sécurité et le retourne si valide."},
+                    {sig:"static Coup trouverRoquePrioritaire(Plateau, List<Coup>, int ply, int maxPly)",desc:"Retourne un coup de roque sûr si disponible dans la fenêtre d'ouverture étendue."}
+                ],
+                deps:["Plateau","Coup","Niveau","LivreOuvertures","GestionnairePhaseOuverture","Evaluation","Materiel"]},
+            {id:"RapporteurRecherche",name:"RapporteurRecherche",type:"class",pkg:"fr.moteurechecs.ia",decl:"public final class RapporteurRecherche",
+                desc:"Utilitaire statique de reporting de la recherche. Formate et affiche les informations de la dernière recherche dans la console (profondeur, phase, coup, temps) et notifie l'interface graphique via le callback observateur avec une chaîne formatée.",
+                fields:[],
+                methods:[
+                    {sig:"static void afficherLog(Niveau, Coup, int, int, String, long)",desc:"Affiche dans la console les informations de la recherche terminée."},
+                    {sig:"static void notifierObservateur(Consumer<String>, Coup, int, int, String, long)",desc:"Envoie un résumé à l'observateur GUI si non null."}
+                ],deps:["Coup","Niveau"]}
+        ]},
+        {id:"ia-evaluation",name:"fr.moteurechecs.ia.evaluation",role:"Sous-modules d'évaluation : matériel, mobilité, PST, sécurité du roi",classes:[
+            {id:"FonctionEvaluation",name:"FonctionEvaluation",type:"interface",pkg:"fr.moteurechecs.ia.evaluation",decl:"public interface FonctionEvaluation",
+                desc:"Interface fonctionnelle à une seule méthode définissant le contrat d'une fonction d'évaluation de position. Chaque niveau de difficulté possède sa propre implémentation. Un score positif désigne un avantage pour les Blancs.",
+                fields:[],
+                methods:[{sig:"int evaluer(Plateau plateau)",desc:"Évalue la position et retourne un score en centipions (positif = avantage Blancs)."}],
+                deps:["Plateau"]},
+            {id:"EvaluationSimple",name:"EvaluationSimple",type:"class",pkg:"fr.moteurechecs.ia.evaluation",decl:"public final class EvaluationSimple implements FonctionEvaluation",
+                desc:"Fonction d'évaluation légère utilisée au niveau FACILE. Intègre le score matériel, un bonus de développement de 15 centipions par pièce mineure développée, et un bonus de contrôle du centre (10 cp pour les cases d4/d5/e4/e5, 5 cp pour les cases adjacentes). Conçue pour être rapide au détriment de la précision.",
+                fields:[],methods:[{sig:"int evaluer(Plateau plateau)",desc:"Retourne matériel + développement + contrôle du centre."}],
+                deps:["Plateau","FonctionEvaluation","Materiel"]},
+            {id:"EvaluationIntermediaire",name:"EvaluationIntermediaire",type:"class",pkg:"fr.moteurechecs.ia.evaluation",decl:"public final class EvaluationIntermediaire implements FonctionEvaluation",
+                desc:"Fonction d'évaluation de niveau intermédiaire utilisée au niveau MOYEN. Combine le score matériel, la mobilité (nombre de coups légaux × 2 centipions) et la structure des pions en finale.",
+                fields:[],methods:[{sig:"int evaluer(Plateau plateau)",desc:"Retourne matériel + mobilité + structure de pions en finale."}],
+                deps:["Plateau","FonctionEvaluation","Materiel","Mobilite","StructurePions"]},
+            {id:"EvaluationComplete",name:"EvaluationComplete",type:"class",pkg:"fr.moteurechecs.ia.evaluation",decl:"public final class EvaluationComplete implements FonctionEvaluation",
+                desc:"Délègue intégralement à Evaluation.evaluer(plateau). Permet à la hiérarchie de FonctionEvaluation de fonctionner uniformément quelle que soit la complexité réelle de l'évaluation sous-jacente.",
+                fields:[],methods:[{sig:"int evaluer(Plateau plateau)",desc:"Délègue à Evaluation.evaluer(plateau)."}],
+                deps:["Plateau","FonctionEvaluation","Evaluation"]},
+            {id:"PhaseDeJeu",name:"PhaseDeJeu",type:"class",pkg:"fr.moteurechecs.ia.evaluation",decl:"public final class PhaseDeJeu",
+                desc:"Calcule le facteur de phase de la partie dans l'intervalle [0,0 ; 1,0] : 1,0 correspond à l'ouverture complète, 0,0 à la finale pure. Le calcul est basé sur les points de pièces restants (dame = 4, tour = 2, fou = 1, cavalier = 1) sur un maximum de 24 points. Ce facteur est utilisé pour interpoler linéairement entre les scores de milieu de jeu et de finale.",
+                fields:[{type:"static final int",name:"PHASE_MAX = 24",desc:"Score de phase correspondant à la position initiale (toutes pièces présentes)."}],
+                methods:[{sig:"static double calculerPhase(Plateau plateau)",desc:"Retourne un facteur de phase compris entre 0,0 (finale) et 1,0 (ouverture/milieu de jeu)."}],
+                deps:["Plateau","Piece"]},
+            {id:"Materiel",name:"Materiel",type:"class",pkg:"fr.moteurechecs.ia.evaluation",decl:"public final class Materiel",
+                desc:"Calcule le déséquilibre matériel entre les deux camps en centipions. Utilise les valeurs : pion = 100, cavalier = 320, fou = 330, tour = 500, dame = 900. Un score positif signifie un avantage matériel pour les Blancs.",
+                fields:[],
+                methods:[{sig:"static int scoreMateriel(Plateau plateau)",desc:"Retourne la différence de valeur matérielle (Blancs − Noirs) en centipions."}],
+                deps:["Plateau","Piece","Evaluation"]},
+            {id:"Mobilite",name:"Mobilite",type:"class",pkg:"fr.moteurechecs.ia.evaluation",decl:"public final class Mobilite",
+                desc:"Évalue la mobilité différentielle : nombre de coups légaux du joueur au trait moins nombre de coups légaux de l'adversaire, multiplié par 2 centipions. Un score positif signifie que le joueur au trait a plus de liberté de mouvement.",
+                fields:[],
+                methods:[{sig:"static int scoreMobilite(Plateau plateau)",desc:"Retourne la mobilité différentielle en centipions."}],
+                deps:["Plateau","GenerateurCoups","Couleur"]},
+            {id:"StructurePions",name:"StructurePions",type:"class",pkg:"fr.moteurechecs.ia.evaluation",decl:"public final class StructurePions",
+                desc:"Évalue l'avancement des pions en phase de finale. Chaque pion reçoit un bonus de 6 centipions par rangée d'avancement depuis sa position de départ. Les pions blancs sont récompensés pour s'approcher de la 8e rangée, les pions noirs pour s'approcher de la 1re rangée.",
+                fields:[{type:"static final int",name:"BONUS_PION_AVANCE = 6",desc:"Bonus par rangée d'avancement pour chaque pion."}],
+                methods:[{sig:"static int scorePionsFinale(Plateau plateau)",desc:"Retourne le score différentiel d'avancement des pions (Blancs − Noirs) en centipions."}],
+                deps:["Plateau","Piece","Case"]},
+            {id:"SecuriteRoi",name:"SecuriteRoi",type:"class",pkg:"fr.moteurechecs.ia.evaluation",decl:"public final class SecuriteRoi",
+                desc:"Évalue la sécurité du roi en milieu de jeu et son activité en finale. En milieu de jeu, applique un malus progressif (carré du nombre de cases adjacentes attaquées × 8 cp) pour les deux rois. En finale, ajoute un bonus de centralisation de 35 cp par unité de proximité au centre pour inciter le roi à jouer activement.",
+                fields:[
+                    {type:"static final int",name:"BONUS_ROI_CENTRE_FINALE = 35",desc:"Bonus par unité de proximité au centre pour le roi en finale."},
+                    {type:"static final int",name:"MALUS_CASE_ROI_ATTAQUEE = 8",desc:"Malus de base par case adjacente attaquée en milieu de jeu."}
+                ],
+                methods:[
+                    {sig:"static int scoreSecuriteRoiMilieuJeu(Plateau plateau)",desc:"Retourne le score différentiel de sécurité du roi (Blancs − Noirs) en milieu de jeu."},
+                    {sig:"static int scoreRoiActifFinale(Plateau plateau)",desc:"Retourne le score différentiel d'activité/centralisation du roi en finale."}
+                ],
+                deps:["Plateau","Masques","Arbitre","Piece","Case","UtilitairesEvaluation","Couleur"]},
+            {id:"TablePositionnelle",name:"TablePositionnelle",type:"class",pkg:"fr.moteurechecs.ia.evaluation",decl:"public final class TablePositionnelle",
+                desc:"Tables de bonus positionnels (Piece-Square Tables, PST). Contient des tableaux pour les pions, cavaliers, fous, et deux tables pour le roi (milieu de jeu et finale). Le score du roi est interpolé par le facteur de phase. Les pièces noires utilisent le miroir vertical (indice XOR 56).",
+                fields:[],
+                methods:[{sig:"static int scorePositionnelPieceSquare(Plateau plateau, double phase)",desc:"Retourne le score PST différentiel (Blancs − Noirs) en centipions, avec interpolation du roi selon la phase."}],
+                deps:["Plateau","Piece","Case"]},
+            {id:"UtilitairesEvaluation",name:"UtilitairesEvaluation",type:"class",pkg:"fr.moteurechecs.ia.evaluation",decl:"public final class UtilitairesEvaluation",
+                desc:"Utilitaires statiques de manipulation de bitboards dans le contexte de l'évaluation. Fournit un wrapper de Long.bitCount et une méthode pour extraire la Case d'un bitboard à bit unique.",
+                fields:[],
+                methods:[
+                    {sig:"static int compter(long bitboard)",desc:"Retourne le nombre de bits à 1 dans le bitboard."},
+                    {sig:"static Case trouverCaseUnique(long bitboard)",desc:"Retourne la Case correspondant au seul bit actif du bitboard, ou null."}
+                ],deps:["Case"]},
+            {id:"EvaluationOuverture",name:"EvaluationOuverture",type:"class",pkg:"fr.moteurechecs.ia.evaluation",decl:"public final class EvaluationOuverture",
+                desc:"Utilitaire statique d'évaluation spécifique à la phase d'ouverture. Combine contrôle du centre, développement des pièces et sécurité du roi en un seul score. La méthode estPhaseOuverture détermine si au moins deux pièces mineures sont encore sur leurs cases initiales.",
+                fields:[],
+                methods:[
+                    {sig:"static int evaluerOuverture(Plateau plateau)",desc:"Retourne le score d'ouverture (centre + développement + sécurité roi)."},
+                    {sig:"static boolean estPhaseOuverture(Plateau plateau)",desc:"Retourne true si ≥ 2 pièces mineures sont encore non développées."}
+                ],deps:["Plateau","Piece","Couleur"]}
+        ]},
+        {id:"ia-recherche",name:"fr.moteurechecs.ia.recherche",role:"Récursion Alpha-Bêta, quiescence, table de transposition, tri MVV-LVA",classes:[
+            {id:"RecursionAlphaBeta",name:"RecursionAlphaBeta",type:"class",pkg:"fr.moteurechecs.ia.recherche",decl:"public final class RecursionAlphaBeta",
+                desc:"Implémentation récursive du minimax avec élagage alpha-bêta. Les Blancs maximisent, les Noirs minimisent. À la profondeur 0, délègue à RechercheQuiescence. Avant chaque récursion, vérifie la répétition de position dans la pile d'historique Zobrist : si la position a déjà été vue deux fois, retourne 0 (nul par répétition). Sonde et stocke la table de transposition si le niveau le permet.",
+                fields:[],
+                methods:[{sig:"static int minimax(Plateau, int, int, int, AtomicBoolean, Niveau, long[], int)",desc:"Recherche récursive alpha-bêta. Lance ExceptionTempsDepasse si le signal tempsEcoule est actif."}],
+                deps:["Plateau","Coup","Niveau","RechercheQuiescence","TableDeTransposition","TrieurDeCoups","GenerateurCoups","ExceptionTempsDepasse","Evaluation"]},
+            {id:"RechercheQuiescence",name:"RechercheQuiescence",type:"class",pkg:"fr.moteurechecs.ia.recherche",decl:"public final class RechercheQuiescence",
+                desc:"Étend la recherche alpha-bêta au-delà de la profondeur limite pour les positions tactiquement instables. N'explore que les captures et promotions. Utilise un score de stand-pat : si l'évaluation statique est déjà au-dessus de bêta, coupe immédiatement.",
+                fields:[],
+                methods:[{sig:"static int quiescenceSearch(Plateau, int, int, AtomicBoolean, Niveau)",desc:"Recherche de quiescence : explore captures et promotions jusqu'à stabilisation."}],
+                deps:["Plateau","Coup","Niveau","GenerateurCoups","ExceptionTempsDepasse"]},
+            {id:"TrieurDeCoups",name:"TrieurDeCoups",type:"class",pkg:"fr.moteurechecs.ia.recherche",decl:"public final class TrieurDeCoups",
+                desc:"Trie les listes de coups avant la recherche alpha-bêta. Utilise l'heuristique MVV-LVA (Most Valuable Victim – Least Valuable Attacker) : score = 10 × valeur de la victime − valeur de l'attaquant. Fournit également une méthode pour placer le coup de la table de transposition en tête de liste.",
+                fields:[],
+                methods:[
+                    {sig:"static void trierCoups(List<Coup> coups, Plateau plateau)",desc:"Trie les coups par score MVV-LVA décroissant (les meilleures captures en premier)."},
+                    {sig:"static void placerEnPremier(List<Coup> coups, Coup coup)",desc:"Déplace le coup donné en tête de la liste (typiquement le coup de la TT)."}
+                ],deps:["Coup","Plateau","Evaluation"]},
+            {id:"TableDeTransposition",name:"TableDeTransposition",type:"class",pkg:"fr.moteurechecs.ia.recherche",decl:"public final class TableDeTransposition",
+                desc:"Table de transposition Zobrist à écriture directe (last-write-wins). Contient 2²² = 4 194 304 entrées stockées dans des tableaux parallèles. Les clés Zobrist combinent des valeurs aléatoires pour chaque (pièce, case), le trait, les droits de roque et la case en passant, initialisées avec la graine 0xDEADBEEFCAFEBABEL. Supporte trois types d'entrées : EXACT, BORNE_INFERIEURE, BORNE_SUPERIEURE.",
+                fields:[
+                    {type:"static final int",name:"SIZE = 4 194 304",desc:"Nombre d'entrées dans la table (2²²)."},
+                    {type:"static final int",name:"EXACT = 0, BORNE_INFERIEURE = 1, BORNE_SUPERIEURE = 2",desc:"Types d'entrées de la table de transposition."},
+                    {type:"long[]",name:"cles",desc:"Clés Zobrist stockées pour validation des collisions."},
+                    {type:"int[]",name:"scores, profondeurs, types",desc:"Tableaux parallèles contenant le score, la profondeur et le type de l'entrée."},
+                    {type:"Coup[]",name:"meilleursCoups",desc:"Meilleur coup associé à chaque entrée."}
+                ],
+                methods:[
+                    {sig:"static TableDeTransposition getInstance()",desc:"Retourne l'instance singleton de la table."},
+                    {sig:"static long hash(Plateau plateau)",desc:"Calcule l'empreinte Zobrist 64 bits de la position."},
+                    {sig:"void store(long hash, int score, int profondeur, int type, Coup meilleurCoup)",desc:"Stocke une entrée dans la table."},
+                    {sig:"EntreeTT probe(long hash)",desc:"Sonde la table et retourne l'entrée si la clé correspond, ou null."},
+                    {sig:"void clear()",desc:"Vide intégralement la table (appelé à chaque nouvelle partie)."}
+                ],deps:["Plateau","Coup","Piece","Case","Couleur"]},
+            {id:"ExceptionTempsDepasse",name:"ExceptionTempsDepasse",type:"exception",pkg:"fr.moteurechecs.ia.recherche",decl:"public final class ExceptionTempsDepasse extends RuntimeException",
+                desc:"Exception non vérifiée utilisée comme signal de flux de contrôle pour interrompre la recherche alpha-bêta quand le budget temps est dépassé. Lancée par RecursionAlphaBeta.minimax() dès que le signal du GestionnaireTemps est actif. Interceptée par ParalleliseurCoups qui positionne le drapeau abandonné.",
+                fields:[],methods:[],deps:[]}
+        ]},
+        {id:"ouverture",name:"fr.moteurechecs.ouverture",role:"Livre d'ouvertures binaire, parseur PGN, clé de position",classes:[
+            {id:"LivreOuvertures",name:"LivreOuvertures",type:"class",pkg:"fr.moteurechecs.ouverture",decl:"public final class LivreOuvertures",
+                desc:"Singleton gérant le livre d'ouvertures binaire. Chargement paresseux depuis le classpath. Le format binaire contient une version, un nombre de positions, puis des entrées encodant hash de position, cases départ/arrivée, pièce de promotion, nom d'ouverture et fréquence. Recherche par HashMap en O(1) moyen.",
+                fields:[{type:"static final int",name:"MAX_BOOK_PLY = 16",desc:"Nombre maximal de demi-coups pour lesquels le livre est consulté."}],
+                methods:[
+                    {sig:"static LivreOuvertures getInstance()",desc:"Retourne l'instance unique, la charge depuis le classpath si nécessaire."},
+                    {sig:"List<BookCandidate> getCandidates(ClePosition cle, List<Coup> coups, int topK)",desc:"Retourne jusqu'à topK coups candidats pour la position donnée, triés par fréquence."},
+                    {sig:"Optional<Coup> lookup(Plateau plateau, List<Coup> coups, int plyNumber)",desc:"Cherche le meilleur coup du livre pour la position et le numéro de demi-coup."},
+                    {sig:"static void reload(String path)",desc:"Recharge le livre depuis un fichier externe."}
+                ],deps:["Plateau","Coup","ClePosition","EntreeLivreOuvertures"]},
+            {id:"ConstructeurLivreOuvertures",name:"ConstructeurLivreOuvertures",type:"class",pkg:"fr.moteurechecs.ouverture",decl:"public final class ConstructeurLivreOuvertures",
+                desc:"Outil en ligne de commande pour construire le livre d'ouvertures binaire depuis un fichier PGN. Lit en streaming, parse les notations SAN en coups légaux, compte la fréquence de chaque coup par position, et ne conserve que les TOP_K = 6 coups les plus fréquents. Supporte le filtrage par ELO minimal.",
+                fields:[{type:"static final int",name:"TOP_K = 6",desc:"Nombre maximal de coups conservés par position."}],
+                methods:[{sig:"public static void main(String[] args)",desc:"Args : pgnPath bookPath [minElo] [maxPly]. Lit le PGN, construit et sauvegarde le livre binaire."}],
+                deps:["AnalyseurPGN","ClePosition","EntreeLivreOuvertures","Plateau","GenerateurCoups","Coup"]},
+            {id:"EntreeLivreOuvertures",name:"EntreeLivreOuvertures",type:"class",pkg:"fr.moteurechecs.ouverture",decl:"public final class EntreeLivreOuvertures",
+                desc:"Entrée du livre d'ouvertures associant une position à un coup joué et sa fréquence. La méthode toCoup reconstruit un objet Coup complet depuis les indices bruts stockés dans le fichier binaire.",
+                fields:[
+                    {type:"long",name:"positionKey",desc:"Hash 64 bits de la position."},
+                    {type:"int",name:"fromSquare, toSquare",desc:"Indices de la case de départ et d'arrivée [0, 63]."},
+                    {type:"int",name:"promoPiece",desc:"Code de la pièce de promotion (0 si aucune)."},
+                    {type:"String",name:"openingName",desc:"Nom de l'ouverture (ex. \"Sicilian Defense\")."},
+                    {type:"int",name:"moveCount",desc:"Fréquence d'apparition du coup dans la base."}
+                ],
+                methods:[{sig:"Coup toCoup(Couleur couleur)",desc:"Reconstruit un objet Coup complet depuis les indices de l'entrée."}],
+                deps:["Coup","Couleur","Case","Piece"]},
+            {id:"ClePosition",name:"ClePosition",type:"class",pkg:"fr.moteurechecs.ouverture",decl:"public final class ClePosition",
+                desc:"Clé de position à cinq composantes pour le livre d'ouvertures. Combine en un hash 64 bits : le bitboard d'occupation, le bitboard des pièces blanches, les droits de roque (4 bits), la case en passant et le trait. Distincte du hash Zobrist de la TT pour éviter les interférences.",
+                fields:[
+                    {type:"long",name:"piecesKey",desc:"Bitboard d'occupation global."},
+                    {type:"long",name:"couleurKey",desc:"Bitboard des pièces blanches."},
+                    {type:"int",name:"castlingKey",desc:"Droits de roque encodés sur 4 bits."},
+                    {type:"long",name:"epKey",desc:"Case en passant (0 si aucune)."},
+                    {type:"boolean",name:"traitBlanc",desc:"true si c'est au tour des Blancs."}
+                ],
+                methods:[
+                    {sig:"static ClePosition fromPlateau(Plateau plateau)",desc:"Crée une ClePosition depuis l'état courant du plateau."},
+                    {sig:"long toHashKey()",desc:"Retourne le hash 64 bits combiné des cinq composantes."}
+                ],deps:["Plateau"]},
+            {id:"AnalyseurPGN",name:"AnalyseurPGN",type:"class",pkg:"fr.moteurechecs.ouverture",decl:"public final class AnalyseurPGN",
+                desc:"Parseur de fichiers PGN. Lit un fichier en streaming et retourne une liste de parties, chacune contenant les métadonnées (blanc, noir, résultat, ECO, ouverture) et la liste des tokens SAN. Gère la désambiguïsation SAN et les coups spéciaux.",
+                fields:[],
+                methods:[{sig:"static List<PartiePGN> parserFichier(String cheminFichier)",desc:"Parse le fichier PGN et retourne la liste des parties avec leurs métadonnées et coups."}],
+                deps:[]}
+        ]},
+        {id:"jeu",name:"fr.moteurechecs.jeu",role:"Boucle de jeu console, abstraction joueurs",classes:[
+            {id:"Partie",name:"Partie",type:"class",pkg:"fr.moteurechecs.jeu",decl:"public final class Partie",
+                desc:"Boucle de jeu en mode console. Demande le mode de jeu et les niveaux, puis joue jusqu'à mat, pat ou triple répétition. Utilise OrchestrateurIA pour les tours IA et lit les coups humains via JoueurHumain depuis l'entrée standard en notation algébrique.",
+                fields:[],
+                methods:[
+                    {sig:"void lancer()",desc:"Point d'entrée de la partie console : configuration et boucle principale."},
+                    {sig:"void jouer()",desc:"Boucle principale : tours alternés humains/IA, détection de fin de partie."}
+                ],deps:["Plateau","GenerateurCoups","OrchestrateurIA","JoueurIA","JoueurHumain","Niveau","ModeJeu"]},
+            {id:"JoueurIA",name:"JoueurIA",type:"class",pkg:"fr.moteurechecs.jeu",decl:"public final class JoueurIA",
+                desc:"Enveloppe simple autour de OrchestrateurIA.meilleurCoup(). Représente un joueur IA dans la boucle de jeu console, encapsulant le niveau de difficulté.",
+                fields:[{type:"Niveau",name:"niveau",desc:"Niveau de difficulté de ce joueur IA."}],
+                methods:[{sig:"Coup jouer(Plateau plateau)",desc:"Délègue à OrchestrateurIA.meilleurCoup(plateau, niveau) et retourne le coup calculé."}],
+                deps:["Plateau","Coup","Niveau","OrchestrateurIA"]},
+            {id:"JoueurHumain",name:"JoueurHumain",type:"class",pkg:"fr.moteurechecs.jeu",decl:"public final class JoueurHumain",
+                desc:"Joueur humain en mode console. Lit les coups depuis l'entrée standard en notation algébrique (ex. e2e4, promotion e7e8q), les valide contre la liste des coups légaux de la position courante, et retourne le coup légal correspondant. Boucle indéfiniment jusqu'à ce qu'un coup valide soit entré.",
+                fields:[],
+                methods:[
+                    {sig:"JoueurHumain(Scanner scanner)",desc:"Constructeur. Lève IllegalArgumentException si le scanner est null."},
+                    {sig:"Coup demanderCoup(Plateau plateau)",desc:"Demande un coup au joueur en boucle jusqu'à ce qu'une saisie légale soit entrée."}
+                ],deps:["Plateau","Coup","GenerateurCoups","Case","Couleur","Piece"]},
+            {id:"ModeJeu",name:"ModeJeu",type:"enum",pkg:"fr.moteurechecs.jeu",decl:"public enum ModeJeu",
+                desc:"Énumération des modes de jeu disponibles en mode console.",
+                fields:[
+                    {type:"—",name:"HUMAIN_VS_HUMAIN",desc:"Les deux joueurs sont humains."},
+                    {type:"—",name:"HUMAIN_VS_IA",desc:"Blanc = humain, Noir = IA."},
+                    {type:"—",name:"IA_VS_IA",desc:"Les deux joueurs sont des IA."}
+                ],methods:[],deps:[]},
+            {id:"TypeJoueur",name:"TypeJoueur",type:"enum",pkg:"fr.moteurechecs.jeu",decl:"public enum TypeJoueur",
+                desc:"Énumération distinguant un joueur humain d'un joueur IA.",
+                fields:[
+                    {type:"—",name:"HUMAIN",desc:"Joueur humain saisissant ses coups au clavier."},
+                    {type:"—",name:"IA",desc:"Joueur géré par OrchestrateurIA."}
+                ],methods:[],deps:[]}
+        ]},
+        {id:"tournoi",name:"fr.moteurechecs.tournoi",role:"Tournoi automatique entre niveaux, sauvegarde incrémentale",classes:[
+            {id:"Tournoi",name:"Tournoi",type:"class",pkg:"fr.moteurechecs.tournoi",decl:"public final class Tournoi",
+                desc:"Orchestre le tournoi automatique entre toutes les combinaisons de niveaux. Joue 50 parties par paire en alternant les couleurs : 25 avec le joueur A en Blanc, 25 avec le joueur B en Blanc. Gère toutes les fins de partie : mat, pat, triple répétition, règle des 50 coups (100 demi-coups), limite de 400 demi-coups. Reprend automatiquement un tournoi interrompu grâce à LecteurSauvegarde.",
+                fields:[
+                    {type:"static final int",name:"PARTIES_PAR_MATCHUP = 50",desc:"Nombre de parties jouées par paire de niveaux."},
+                    {type:"static final int",name:"MAX_PLIES = 400",desc:"Limite maximale de demi-coups par partie."},
+                    {type:"static final int",name:"REGLE_50_COUPS_PLIES = 100",desc:"Demi-coups sans prise ni pion déclenchant le nul."}
+                ],
+                methods:[
+                    {sig:"public static void main(String[] args)",desc:"Sans argument : tournoi complet. Avec \"NIVEAU1 NIVEAU2\" : matchup unique."},
+                    {sig:"static String jouerUnePartie(Niveau niveauBlanc, Niveau niveauNoir)",desc:"Joue une partie complète et retourne le résultat : \"blanc\", \"noir\" ou \"nul\"."}
+                ],deps:["Niveau","OrchestrateurIA","Plateau","GenerateurCoups","SauvegardeTournoi","LecteurSauvegarde"]},
+            {id:"SauvegardeTournoi",name:"SauvegardeTournoi",type:"class",pkg:"fr.moteurechecs.tournoi",decl:"public final class SauvegardeTournoi",
+                desc:"Écriture incrémentale des résultats du tournoi dans un fichier texte en mode append. Format : PARTIE|niveauA|niveauB|num|blanc|noir|résultat pour chaque partie, MATCHUP_TERMINE|niveauA|niveauB à la fin d'un matchup. Flush après chaque ligne pour garantir la persistance.",
+                fields:[],
+                methods:[
+                    {sig:"void enregistrerPartie(Niveau a, Niveau b, int num, Niveau blanc, Niveau noir, String resultat)",desc:"Écrit une ligne de résultat de partie dans le fichier."},
+                    {sig:"void enregistrerMatchupTermine(Niveau a, Niveau b)",desc:"Écrit la ligne de fin de matchup."},
+                    {sig:"void fermer()",desc:"Ferme le BufferedWriter."}
+                ],deps:["Niveau"]},
+            {id:"LecteurSauvegarde",name:"LecteurSauvegarde",type:"class",pkg:"fr.moteurechecs.tournoi",decl:"public final class LecteurSauvegarde",
+                desc:"Lit un fichier de sauvegarde de tournoi et reconstitue l'état courant : matchups terminés et bilans partiels. Le bilan partiel contient le numéro de la dernière partie, les victoires de chaque joueur, les victoires par couleur et le nombre de nuls.",
+                fields:[],
+                methods:[{sig:"static EtatTournoi lire(String cheminFichier)",desc:"Parse le fichier de sauvegarde et retourne l'état courant du tournoi."}],
+                deps:["Niveau"]},
+            {id:"RapportTournoi",name:"RapportTournoi",type:"class",pkg:"fr.moteurechecs.tournoi",decl:"public final class RapportTournoi",
+                desc:"Consolide plusieurs fichiers de sauvegarde de tournoi en un rapport final unique. Fusionne les résultats par matchup et produit rapport_final.txt avec le bilan agrégé de chaque paire de niveaux.",
+                fields:[],
+                methods:[{sig:"public static void main(String[] args)",desc:"Args : liste de fichiers de sauvegarde à fusionner. Produit rapport_final.txt."}],
+                deps:["LecteurSauvegarde","Niveau"]}
+        ]},
+        {id:"gui",name:"fr.moteurechecs.gui",role:"Interface JavaFX : échiquier interactif, contrôleur MVC, notation SAN",classes:[
+            {id:"MainFX",name:"MainFX",type:"class",pkg:"fr.moteurechecs.gui",decl:"public final class MainFX extends Application",
+                desc:"Point d'entrée JavaFX. Affiche d'abord un menu de configuration permettant de choisir le mode de jeu (H vs H, H vs IA, IA vs H, IA vs IA) et les niveaux de difficulté pour chaque camp via des ComboBox. Après validation, crée un ControleurPartieGUI, construit la scène principale avec l'échiquier, l'historique SAN, le flux de calcul IA, l'indicateur d'avantage matériel et le nom de l'ouverture.",
+                fields:[],
+                methods:[
+                    {sig:"public void start(Stage primaryStage)",desc:"Méthode JavaFX standard. Affiche le menu de démarrage."},
+                    {sig:"public static void main(String[] args)",desc:"Lance l'application JavaFX."}
+                ],deps:["ControleurPartieGUI","Niveau","VueEchiquier"]},
+            {id:"ControleurPartieGUI",name:"ControleurPartieGUI",type:"class",pkg:"fr.moteurechecs.gui",decl:"public class ControleurPartieGUI",
+                desc:"Contrôleur MVC de la partie JavaFX. Fait le lien entre la vue (VueEchiquier) et le modèle (Plateau / OrchestrateurIA). Gère la pile d'historique pour l'annulation, l'affichage SAN, les calculs IA en temps réel, l'avantage matériel et le nom d'ouverture. Les tours IA sont exécutés dans un Task JavaFX sur un thread séparé. Détecte mat, pat et triple répétition.",
+                fields:[
+                    {type:"ObservableList<String>",name:"historiqueAffichage",desc:"Liste observable des coups en notation SAN, liée au ListView de l'interface."},
+                    {type:"ObservableList<String>",name:"calculAIAffichage",desc:"Liste observable des informations de calcul IA en temps réel."},
+                    {type:"SimpleIntegerProperty",name:"avantageMateriel",desc:"Propriété entière de l'avantage matériel (positif = Blancs)."},
+                    {type:"SimpleStringProperty",name:"nomOuverture",desc:"Nom de l'ouverture courante pour l'affichage GUI."}
+                ],
+                methods:[
+                    {sig:"ControleurPartieGUI(boolean iaBlanc, boolean iaNoir, Niveau niveauBlanc, Niveau niveauNoir)",desc:"Constructeur principal. Initialise le plateau, le sélecteur, les ressources et la vue."},
+                    {sig:"void demarrer()",desc:"Lance le premier tour (humain ou IA selon la configuration)."},
+                    {sig:"void traiterClic(Case caseCliquee)",desc:"Traite un clic humain sur l'échiquier : sélection de pièce, tentative de coup."},
+                    {sig:"void annulerCoup()",desc:"Annule le dernier coup (ou les deux derniers en mode H vs IA)."},
+                    {sig:"void rafraichirVue()",desc:"Met à jour l'affichage de l'échiquier, l'historique, l'avantage matériel et le nom d'ouverture."},
+                    {sig:"VueEchiquier getVue()",desc:"Retourne le composant échiquier."}
+                ],
+                deps:["Plateau","VueEchiquier","SelecteurCoup","RessourcesPieces","StatistiquesPartie","OrchestrateurIA","NotationEchecs","Niveau","Coup","Case","EtatPlateau","GenerateurCoups"]},
+            {id:"VueEchiquier",name:"VueEchiquier",type:"class",pkg:"fr.moteurechecs.gui",decl:"public class VueEchiquier extends GridPane",
+                desc:"Composant graphique JavaFX représentant l'échiquier 8×8. Construit une grille de StackPane, chacun contenant un fond coloré (clair #eceed1 / foncé #779556), une surbrillance optionnelle (sélection en vert-jaune, dernier coup en jaune pâle), l'image de la pièce avec ombre portée, et un cercle indicateur pour les coups légaux. Affiche les coordonnées algébriques sur les bords.",
+                fields:[{type:"static final int",name:"TAILLE_CASE = 60",desc:"Taille en pixels du côté d'une case."}],
+                methods:[
+                    {sig:"VueEchiquier(ControleurPartieGUI controleur)",desc:"Construit la vue et enregistre le contrôleur pour les callbacks de clic."},
+                    {sig:"void rafraichir(Plateau, Case, Coup, List<Coup>)",desc:"Redessine intégralement l'échiquier avec la position, la surbrillance et les indicateurs de coups."}
+                ],deps:["ControleurPartieGUI","RessourcesPieces","Plateau","Case","Coup","Piece"]},
+            {id:"StatistiquesPartie",name:"StatistiquesPartie",type:"class",pkg:"fr.moteurechecs.gui",decl:"public final class StatistiquesPartie",
+                desc:"Enregistre les statistiques par coup de la partie en cours : temps de réflexion et profondeur de recherche atteinte pour chaque camp. Propose d'ouvrir un FileChooser en fin de partie pour sauvegarder un rapport texte détaillé.",
+                fields:[],
+                methods:[
+                    {sig:"StatistiquesPartie(boolean iaBlanc, boolean iaNoir, Niveau niveauBlanc, Niveau niveauNoir)",desc:"Constructeur, configure les camps et niveaux enregistrés."},
+                    {sig:"void enregistrerCoup(boolean estBlanc, long tempsMillis, int profondeur)",desc:"Enregistre les données du coup pour le camp donné."},
+                    {sig:"void marquerFinDePartie(String resultat)",desc:"Enregistre le résultat final de la partie."},
+                    {sig:"void sauvegarderStatistiques(Stage fenetre)",desc:"Ouvre un FileChooser et sauvegarde le rapport texte dans le fichier choisi."}
+                ],deps:["Niveau"]},
+            {id:"RessourcesPieces",name:"RessourcesPieces",type:"class",pkg:"fr.moteurechecs.gui",decl:"public class RessourcesPieces",
+                desc:"Gestionnaire de ressources graphiques pour les pièces. Charge les douze images PNG depuis le classpath au chargement de la classe (static initializer). Retourne un nœud JavaFX à la taille demandée. Affiche un texte '?' en fallback si une image est manquante.",
+                fields:[{type:"static Map<Piece, Image>",name:"IMAGES",desc:"Cache des douze images de pièces, indexées par Piece."}],
+                methods:[{sig:"Node getRepresentation(Piece piece, double tailleCase)",desc:"Retourne le nœud JavaFX représentant la pièce à la taille donnée, ou null pour une case vide."}],
+                deps:["Piece"]},
+            {id:"NotationEchecs",name:"NotationEchecs",type:"class",pkg:"fr.moteurechecs.gui",decl:"public final class NotationEchecs",
+                desc:"Génère la notation algébrique standard (SAN) d'un coup dans le contexte d'une position donnée. Gère le roque (O-O / O-O-O), les captures (x), les promotions (=Q), la désambiguïsation (colonne ou ligne source si nécessaire), l'échec (+) et le mat (#).",
+                fields:[],
+                methods:[{sig:"static String versSAN(Plateau plateau, Coup coup, List<Coup> coupsLegaux)",desc:"Retourne la notation SAN du coup dans la position donnée."}],
+                deps:["Plateau","Coup","Piece","Case","GenerateurCoups","Arbitre","Couleur"]},
+            {id:"SelecteurCoup",name:"SelecteurCoup",type:"class",pkg:"fr.moteurechecs.gui",decl:"public class SelecteurCoup",
+                desc:"Automate d'état pour la sélection de coup par un joueur humain. Deux états : aucune sélection (attente d'un premier clic valide) et case de départ sélectionnée (attente d'un clic d'arrivée). Filtre les coups légaux par la case de départ pour l'affichage des indicateurs. En cas de promotion, retourne tous les coups candidats pour que le contrôleur présente la boîte de dialogue.",
+                fields:[
+                    {type:"Case",name:"caseDepart",desc:"Case de départ actuellement sélectionnée, null si aucune sélection."},
+                    {type:"List<Coup>",name:"coupsLegaux",desc:"Liste complète des coups légaux de la position courante."}
+                ],
+                methods:[
+                    {sig:"void setCoupsLegaux(List<Coup> coups)",desc:"Met à jour la liste des coups légaux et réinitialise la sélection."},
+                    {sig:"boolean selectionner(Case caseCliquee)",desc:"Traite un clic : sélectionne la case de départ si valide, ou passe à l'arrivée."},
+                    {sig:"void reinitialiser()",desc:"Réinitialise la sélection courante."},
+                    {sig:"List<Coup> getCoupsPossiblesSelection()",desc:"Retourne les coups légaux depuis la case sélectionnée (pour les indicateurs visuels)."},
+                    {sig:"Coup trouverCoup(Case arrivee)",desc:"Retourne le coup unique ou, en cas de promotion, préfère la dame par défaut."}
+                ],deps:["Case","Coup","Piece"]}
+        ]}
+    ];
+
+    /* ── UTILITAIRES ── */
+    function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+    /* ── SYNTAX HIGHLIGHTING (signatures Java) ── */
+    var JAVA_KW = /\b(void|static|final|public|private|protected|int|long|double|float|boolean|byte|char|short|new|return|null|true|false|extends|implements|throws|class|interface|enum|record)\b/g;
+    /* For signatures: exclude declaration keywords that appear in HTML attr strings */
+    var JAVA_SIG_KW = /\b(void|static|final|public|private|protected|int|long|double|float|boolean|byte|char|short|new|return|null|true|false|extends|implements|throws)\b/g;
+    var JAVA_TYPES = /\b(String|List|Map|Set|Optional|Consumer|AtomicBoolean|Plateau|Coup|Case|Piece|Couleur|Niveau|EtatPlateau|Stage|Node|Image|ResultatIDS|ResultatRecherche|EntreeTT|EtatTournoi|ClePosition|BookCandidate|PartiePGN|Scanner|BufferedWriter|Task|ObservableList|SimpleIntegerProperty|SimpleStringProperty)\b/g;
+
+    function highlight(sig){
+        if(!sig) return '';
+        var s = esc(sig);
+        /* method name — word before first '(' */
+        s = s.replace(/(\w+)(\()/, function(m, name, paren){
+            return '<span class="sm">'+name+'</span><span class="sp">(</span>';
+        });
+        /* keywords — use sig-safe regex (no 'class'/'interface' etc.) */
+        s = s.replace(JAVA_SIG_KW, function(m){
+            if(m==='null'||m==='true'||m==='false') return '<span class="sv">'+m+'</span>';
+            return '<span class="sk">'+m+'</span>';
+        });
+        /* types */
+        s = s.replace(JAVA_TYPES, '<span class="st">$&</span>');
+        /* punctuation — only commas (never / which breaks </span> tags) */
+        s = s.replace(/,/g, '<span class="sp">,</span>');
+        return s;
+    }
+
+    function highlightDecl(decl){
+        if(!decl) return '';
+        var s = esc(decl);
+        s = s.replace(JAVA_KW, function(m){
+            return '<span class="sk">'+m+'</span>';
+        });
+        s = s.replace(JAVA_TYPES, '<span class="st">$&</span>');
+        /* class/interface name (word after class/interface/enum/record keyword) */
+        s = s.replace(/(<span class="sk">(?:class|interface|enum|record)<\/span>) (\w+)/, '$1 <span class="sm">$2</span>');
+        return s;
+    }
+
+    /* ── SIDEBAR ── */
+    function buildSidebar(){
+        var nav = document.getElementById('sbNav');
+        nav.innerHTML = '';
+        PACKAGES.forEach(function(pkg){
+            var grp = document.createElement('div');
+            grp.className = 'pkg-grp'; grp.id = 'grp-' + pkg.id;
+            var tog = document.createElement('div');
+            tog.className = 'pkg-toggle';
+            tog.innerHTML = '<span class="pkg-name">'+pkg.id+'</span><svg class="pkg-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>';
+            tog.addEventListener('click', function(){ grp.classList.toggle('open'); });
+            var cls = document.createElement('div');
+            cls.className = 'pkg-cls';
+            pkg.classes.forEach(function(c){
+                var item = document.createElement('div');
+                item.className = 'cls-item'; item.id = 'nav-' + c.id;
+                item.innerHTML = '<span class="cls-dot"></span>' + esc(c.name);
+                item.addEventListener('click', function(){ showClass(c.id); closeMobileMenu(); });
+                cls.appendChild(item);
+            });
+            grp.appendChild(tog); grp.appendChild(cls); nav.appendChild(grp);
+        });
+    }
+
+    /* ── HOME ── */
+    function renderHome(){
+        var total = PACKAGES.reduce(function(s,p){ return s+p.classes.length; },0);
+        var rows = PACKAGES.map(function(pkg){
+            return '<tr onclick="showPackage(\''+pkg.id+'\')">'+
+                '<td>'+esc(pkg.name)+'</td>'+
+                '<td>'+esc(pkg.role)+'</td>'+
+                '<td style="text-align:right">'+pkg.classes.length+'</td></tr>';
+        }).join('');
+        return '<div class="doc-home">'+
+            '<h1 class="doc-home-title">Documentation technique</h1>'+
+            '<p class="doc-home-sub">Vue d\'ensemble des '+PACKAGES.length+' packages et '+total+
+            ' classes du moteur d\'échecs DEEP BLACK, implémenté en Java 17 avec Maven.</p>'+
+            '<table class="pkg-table"><thead><tr><th>Package</th><th>Rôle</th><th style="text-align:right">Classes</th></tr></thead>'+
+            '<tbody>'+rows+'</tbody></table></div>';
+    }
+
+    /* ── RENDU CLASSE ── */
+    function renderClass(cls){
+        var fields = '';
+        if(cls.fields && cls.fields.length){
+            fields = '<div class="cs"><div class="cs-head">Champs</div>'+
+                '<table class="dt"><thead><tr><th>Type</th><th>Nom</th><th>Description</th></tr></thead><tbody>'+
+                cls.fields.map(function(f){
+                    return '<tr><td class="td-t"><span class="sk">'+esc(f.type)+'</span></td><td class="td-n">'+esc(f.name)+'</td><td>'+f.desc+'</td></tr>';
+                }).join('')+'</tbody></table></div>';
+        }
+        var methods = '';
+        if(cls.methods && cls.methods.length){
+            methods = '<div class="cs"><div class="cs-head">Méthodes publiques</div>'+
+                '<table class="dt"><thead><tr><th>Signature</th><th>Description</th></tr></thead><tbody>'+
+                cls.methods.map(function(m){
+                    return '<tr><td class="td-s">'+highlight(m.sig)+'</td><td>'+m.desc+'</td></tr>';
+                }).join('')+'</tbody></table></div>';
+        }
+        var deps = '';
+        if(cls.deps && cls.deps.length){
+            deps = '<div class="cs"><div class="cs-head">Dépendances</div><div class="deps">'+
+                cls.deps.map(function(d){
+                    return '<span class="dep" onclick="navigateTo(\''+esc(d)+'\')">'+esc(d)+'</span>';
+                }).join('')+'</div></div>';
+        }
+        return '<div class="class-page">'+
+            '<div class="class-crumb">'+esc(cls.pkg)+' / '+esc(cls.name)+'</div>'+
+            '<div class="class-hd"><span class="class-name">'+esc(cls.name)+'</span>'+
+            '<span class="badge badge-'+cls.type+'">'+cls.type+'</span></div>'+
+            '<div class="class-decl">'+highlightDecl(cls.decl)+'</div>'+
+            '<div class="class-desc">'+cls.desc+'</div>'+
+            fields+methods+deps+'</div>';
+    }
+
+    /* ── NAVIGATION ── */
+    function showHome(){
+        document.getElementById('mainContent').innerHTML = renderHome();
+        document.getElementById('mainContent').scrollTop = 0;
+        document.getElementById('navCur').textContent = 'Documentation';
+        document.querySelectorAll('.cls-item').forEach(function(el){ el.classList.remove('active'); });
+        history.replaceState(null,'',window.location.pathname);
+    }
+
+    function showClass(id){
+        var cls = null, pkgId = null;
+        PACKAGES.forEach(function(pkg){
+            pkg.classes.forEach(function(c){ if(c.id===id){ cls=c; pkgId=pkg.id; } });
+        });
+        if(!cls) return;
+        document.getElementById('mainContent').innerHTML = renderClass(cls);
+        document.getElementById('mainContent').scrollTop = 0;
+        document.getElementById('navCur').textContent = cls.name;
+        document.querySelectorAll('.cls-item').forEach(function(el){ el.classList.remove('active'); });
+        var link = document.getElementById('nav-'+id);
+        if(link){
+            link.classList.add('active');
+            var grp = document.getElementById('grp-'+pkgId);
+            if(grp) grp.classList.add('open');
+        }
+        history.replaceState(null,'','#'+id);
+    }
+
+    function showPackage(pkgId){
+        PACKAGES.forEach(function(pkg){
+            if(pkg.id===pkgId && pkg.classes.length){ showClass(pkg.classes[0].id); }
+        });
+    }
+
+    function navigateTo(name){
+        PACKAGES.forEach(function(pkg){
+            pkg.classes.forEach(function(c){ if(c.id===name||c.name===name) showClass(c.id); });
+        });
+    }
+
+    /* ── RECHERCHE ── */
+    document.getElementById('searchInput').addEventListener('input', function(){
+        var q = this.value.toLowerCase().trim();
+        PACKAGES.forEach(function(pkg){
+            var grp = document.getElementById('grp-'+pkg.id);
+            if(!grp) return;
+            var any = false;
+            pkg.classes.forEach(function(c){
+                var el = document.getElementById('nav-'+c.id);
+                if(!el) return;
+                var ok = !q || c.name.toLowerCase().indexOf(q) >= 0;
+                el.classList.toggle('hidden',!ok);
+                if(ok) any = true;
+            });
+            grp.style.display = (any||!q) ? '' : 'none';
+            if(q && any) grp.classList.add('open');
+        });
+    });
+
+    /* ── MOBILE ── */
+    function closeMobileMenu(){
+        document.getElementById('sidebar').classList.remove('open');
+        document.getElementById('mobOverlay').style.display = 'none';
+    }
+    document.getElementById('menuBtn').addEventListener('click', function(){
+        var sb = document.getElementById('sidebar');
+        var open = sb.classList.toggle('open');
+        document.getElementById('mobOverlay').style.display = open ? 'block' : 'none';
+    });
+    document.getElementById('mobOverlay').addEventListener('click', closeMobileMenu);
+
+    /* ── THÈME ── */
+    (function(){
+        var btn  = document.getElementById('themeBtn');
+        var html = document.documentElement;
+        var style = document.createElement('style');
+        style.textContent = '::view-transition-old(root){z-index:1;animation:none;mix-blend-mode:normal}::view-transition-new(root){z-index:9999;animation:none;mix-blend-mode:normal}';
+        document.head.appendChild(style);
+        btn.addEventListener('click', function(){
+            var cur = html.getAttribute('data-theme');
+            var next = cur === 'dark' ? 'light' : 'dark';
+            var r = btn.getBoundingClientRect();
+            var x = Math.round(r.left + r.width/2);
+            var y = Math.round(r.top + r.height/2);
+            var radius = Math.ceil(Math.hypot(Math.max(x, innerWidth-x), Math.max(y, innerHeight-y)));
+            if(document.startViewTransition){
+                var t = document.startViewTransition(function(){
+                    html.setAttribute('data-theme', next);
+                    localStorage.setItem('db-theme', next);
+                });
+                t.ready.then(function(){
+                    document.documentElement.animate(
+                        { clipPath: ['circle(0px at '+x+'px '+y+'px)', 'circle('+radius+'px at '+x+'px '+y+'px)'] },
+                        { duration: 600, easing: 'cubic-bezier(0.76,0,0.24,1)', pseudoElement: '::view-transition-new(root)' }
+                    );
+                });
+            } else {
+                html.setAttribute('data-theme', next);
+                localStorage.setItem('db-theme', next);
+            }
+        });
+    }());
+
+    /* ── INIT ── */
+    buildSidebar();
+    var hash = window.location.hash.slice(1);
+    if(hash){ showClass(hash); } else { showHome(); }
+    window.addEventListener('hashchange', function(){
+        var h = window.location.hash.slice(1);
+        if(h){ showClass(h); } else { showHome(); }
+    });
+</script>
+</body>
+</html>

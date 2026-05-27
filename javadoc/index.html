@@ -1,0 +1,1326 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="dark">
+
+<head>
+    <script>
+        (function () { var t = localStorage.getItem('db-theme'); document.documentElement.setAttribute('data-theme', t === 'light' ? 'light' : 'dark'); }());
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DEEP BLACK — Moteur d'échecs Java</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
+    <style>
+        [data-theme="dark"] {
+            --bg: #080808;
+            --bg-card: #0e0e0e;
+            --bg-hover: #161616;
+            --border: rgba(255, 255, 255, 0.065);
+            --border-h: rgba(255, 255, 255, 0.13);
+            --text: #f0f0f0;
+            --text-2: #8c8c8c;
+            --text-3: #3e3e3e;
+            --accent: #fff;
+            --acc-inv: #000;
+            --grid: rgba(255, 255, 255, 0.018);
+            --shadow: rgba(0, 0, 0, 0.65);
+        }
+
+        [data-theme="light"] {
+            --bg: #f6f6f4;
+            --bg-card: #ffffff;
+            --bg-hover: #ebebeb;
+            --border: rgba(0, 0, 0, 0.07);
+            --border-h: rgba(0, 0, 0, 0.15);
+            --text: #111111;
+            --text-2: #3d3d3d;
+            --text-3: #a0a0a0;
+            --accent: #0f0f0f;
+            --acc-inv: #fff;
+            --grid: rgba(0, 0, 0, 0.03);
+            --shadow: rgba(0, 0, 0, 0.07);
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body {
+            font-family: 'DM Sans', -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        ::selection {
+            background: var(--accent);
+            color: var(--acc-inv);
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+            background-image:
+                linear-gradient(var(--grid) 1px, transparent 1px),
+                linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+            background-size: 48px 48px;
+        }
+
+        ::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border-h);
+            border-radius: 3px;
+        }
+
+        /* ── NAVBAR ── */
+        .nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            height: 56px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 32px;
+            border-bottom: 1px solid transparent;
+            transition: background 300ms, border-color 300ms, backdrop-filter 300ms;
+        }
+
+        .nav.scrolled {
+            background: var(--bg);
+            border-bottom-color: var(--border);
+            backdrop-filter: blur(24px) saturate(180%);
+            -webkit-backdrop-filter: blur(24px) saturate(180%);
+        }
+
+        .nav-logo {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: .12em;
+            text-transform: uppercase;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 32px;
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .nav-links a {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: .08em;
+            text-transform: uppercase;
+            color: var(--text-2);
+            transition: color 200ms;
+        }
+
+        .nav-links a:hover {
+            color: var(--text);
+        }
+
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+        }
+
+        .theme-btn {
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            border: 1px solid var(--border-h);
+            background: transparent;
+            cursor: pointer;
+            color: var(--text-2);
+            transition: background 150ms, color 150ms;
+        }
+
+        .theme-btn:hover {
+            background: var(--bg-hover);
+            color: var(--text);
+        }
+
+        .theme-btn svg {
+            width: 15px;
+            height: 15px;
+        }
+
+        .icon-sun {
+            display: none;
+        }
+
+        .icon-moon {
+            display: block;
+        }
+
+        [data-theme="light"] .icon-sun {
+            display: block;
+        }
+
+        [data-theme="light"] .icon-moon {
+            display: none;
+        }
+
+        /* ── HERO ── */
+        .hero {
+            position: relative;
+            z-index: 1;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 110px 24px 90px;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0
+            }
+
+            to {
+                opacity: 1
+            }
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(22px)
+            }
+
+            to {
+                opacity: 1;
+                transform: none
+            }
+        }
+
+        @keyframes blink {
+
+            0%,
+            100% {
+                opacity: 1
+            }
+
+            50% {
+                opacity: 0
+            }
+        }
+
+        .hero-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 16px;
+            border: 1px solid var(--border-h);
+            border-radius: 100px;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 11px;
+            font-weight: 500;
+            letter-spacing: .1em;
+            text-transform: uppercase;
+            color: var(--text-2);
+            margin-bottom: 36px;
+            animation: fadeIn 500ms ease both;
+        }
+
+        .hero-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: clamp(72px, 12vw, 158px);
+            font-weight: 700;
+            letter-spacing: -.05em;
+            line-height: .88;
+            color: var(--text);
+            margin-bottom: 10px;
+            animation: slideUp 700ms cubic-bezier(0.16, 1, 0.3, 1) 60ms both;
+        }
+
+        .hero-sub-title {
+            font-family: 'DM Sans', sans-serif;
+            font-size: clamp(18px, 2.8vw, 32px);
+            font-weight: 300;
+            letter-spacing: .06em;
+            color: var(--text-2);
+            margin-bottom: 32px;
+            animation: slideUp 700ms cubic-bezier(0.16, 1, 0.3, 1) 120ms both;
+        }
+
+        .hero-tw {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            color: var(--text-2);
+            min-height: 22px;
+            margin-bottom: 48px;
+            animation: fadeIn 500ms ease 500ms both;
+            letter-spacing: -.01em;
+        }
+
+        .cursor {
+            display: inline-block;
+            color: var(--text-3);
+            animation: blink 530ms step-end infinite;
+        }
+
+        .hero-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+            animation: slideUp 600ms cubic-bezier(0.16, 1, 0.3, 1) 700ms both;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 11px 22px;
+            border-radius: 10px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 14px;
+            font-weight: 500;
+            border: none;
+            cursor: pointer;
+            transition: opacity 180ms, transform 180ms, background 180ms;
+        }
+
+        .btn svg {
+            width: 15px;
+            height: 15px;
+            flex-shrink: 0;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: var(--acc-inv);
+            box-shadow: 0 2px 12px var(--shadow);
+        }
+
+        .btn-primary:hover {
+            opacity: .82;
+            transform: translateY(-1px);
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--text);
+            border: 1px solid var(--border-h);
+        }
+
+        .btn-outline:hover {
+            background: var(--bg-hover);
+        }
+
+        /* ── TICKER (slider infini) ── */
+        .ticker-wrap {
+            position: relative;
+            z-index: 1;
+            overflow: hidden;
+            margin: 0 0 120px;
+            padding: 20px 0;
+        }
+
+        .ticker-wrap::before,
+        .ticker-wrap::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 200px;
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        .ticker-wrap::before {
+            left: 0;
+            background: linear-gradient(to right, var(--bg), transparent);
+        }
+
+        .ticker-wrap::after {
+            right: 0;
+            background: linear-gradient(to left, var(--bg), transparent);
+        }
+
+        .ticker-track {
+            display: flex;
+            width: max-content;
+            animation: ticker 32s linear infinite;
+        }
+
+        .ticker-track:hover {
+            animation-play-state: paused;
+        }
+
+        @keyframes ticker {
+            from {
+                transform: translateX(0);
+            }
+
+            to {
+                transform: translateX(-50%);
+            }
+        }
+
+        .ticker-item {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            padding: 0 60px;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .ticker-num {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 46px;
+            font-weight: 700;
+            letter-spacing: -.05em;
+            color: var(--text);
+            line-height: 1;
+        }
+
+        .ticker-label {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 11px;
+            font-weight: 500;
+            letter-spacing: .12em;
+            text-transform: uppercase;
+            color: var(--text-3);
+            max-width: 80px;
+            white-space: normal;
+            line-height: 1.4;
+        }
+
+        /* ── FEATURES ── */
+        .features {
+            position: relative;
+            z-index: 1;
+            max-width: 1120px;
+            margin: 0 auto;
+            padding: 0 36px 100px;
+        }
+
+        .feat-eyebrow {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: .14em;
+            text-transform: uppercase;
+            color: var(--text-3);
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .feat-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: clamp(26px, 3.5vw, 42px);
+            font-weight: 700;
+            letter-spacing: -.04em;
+            text-align: center;
+            color: var(--text);
+            margin-bottom: 56px;
+        }
+
+        .feat-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1px;
+            background: var(--border);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            overflow: hidden;
+        }
+
+        @media (max-width: 860px) {
+            .feat-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .feat-item {
+            background: var(--bg-card);
+            padding: 32px 30px 28px;
+            transition: background 200ms;
+        }
+
+        .feat-item:hover {
+            background: var(--bg-hover);
+        }
+
+        .feat-icon {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: transparent;
+            border: 1px solid var(--border-h);
+            border-radius: 50%;
+            margin-bottom: 18px;
+            color: var(--text);
+        }
+
+        .feat-icon svg {
+            width: 17px;
+            height: 17px;
+        }
+
+        .feat-item-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 15px;
+            font-weight: 600;
+            letter-spacing: -.02em;
+            color: var(--text);
+            margin-bottom: 10px;
+        }
+
+        .feat-item-desc {
+            font-size: 14px;
+            line-height: 1.75;
+            color: var(--text-2);
+        }
+
+        /* ── ARCHITECTURE ── */
+        .section {
+            position: relative;
+            z-index: 1;
+            max-width: 1120px;
+            margin: 0 auto;
+            padding: 0 36px 110px;
+        }
+
+        .section-eyebrow {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: .14em;
+            text-transform: uppercase;
+            color: var(--text-3);
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .section-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: clamp(26px, 3.5vw, 42px);
+            font-weight: 700;
+            letter-spacing: -.04em;
+            text-align: center;
+            color: var(--text);
+            margin-bottom: 52px;
+        }
+
+        .pkg-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+        }
+
+        @media (max-width: 1000px) {
+            .pkg-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 560px) {
+            .pkg-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @keyframes cardUp {
+            from {
+                opacity: 0;
+                transform: translateY(16px)
+            }
+
+            to {
+                opacity: 1;
+                transform: none
+            }
+        }
+
+        .pkg-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 22px;
+            cursor: pointer;
+            opacity: 0;
+            animation: cardUp 450ms cubic-bezier(0.16, 1, 0.3, 1) both;
+            transition: border-color 180ms, transform 200ms, box-shadow 200ms;
+        }
+
+        .pkg-card:hover {
+            border-color: var(--border-h);
+            transform: translateY(-2px);
+            box-shadow: 0 12px 36px var(--shadow);
+        }
+
+        .pkg-card-id {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            color: var(--text-3);
+            margin-bottom: 10px;
+            letter-spacing: .02em;
+        }
+
+        .pkg-card-role {
+            font-size: 13px;
+            font-weight: 400;
+            color: var(--text);
+            line-height: 1.6;
+            margin-bottom: 16px;
+        }
+
+        .pkg-card-foot {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .pkg-card-count {
+            font-size: 12px;
+            color: var(--text-2);
+        }
+
+        .pkg-card-arrow {
+            width: 15px;
+            height: 15px;
+            color: var(--text-3);
+            transition: transform 180ms, color 180ms;
+        }
+
+        .pkg-card:hover .pkg-card-arrow {
+            transform: translateX(3px);
+            color: var(--text);
+        }
+
+        /* ── GET STARTED ── */
+        .getstarted {
+            position: relative;
+            z-index: 1;
+            max-width: 780px;
+            margin: 0 auto;
+            padding: 0 36px 110px;
+        }
+
+        .getstarted .section-eyebrow {
+            text-align: left;
+        }
+
+        .getstarted .section-title {
+            text-align: left;
+            margin-bottom: 12px;
+        }
+
+        .gs-subtitle {
+            font-size: 15px;
+            color: var(--text-2);
+            line-height: 1.7;
+            margin-bottom: 40px;
+        }
+
+        .gs-step {
+            margin-bottom: 32px;
+        }
+
+        .gs-step-label {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: .06em;
+            color: var(--text-2);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .gs-step-label span.gs-num {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--border-h);
+            font-size: 11px;
+            color: var(--text-2);
+        }
+
+        .gs-or {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 28px 0;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: .1em;
+            text-transform: uppercase;
+            color: var(--text-3);
+        }
+
+        .gs-or::before,
+        .gs-or::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border);
+        }
+
+        /* Terminal block */
+        .term {
+            position: relative;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .term-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 14px;
+            border-bottom: 1px solid var(--border);
+            background: var(--bg-hover);
+        }
+
+        .term-dots {
+            display: flex;
+            gap: 5px;
+        }
+
+        .term-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--border-h);
+        }
+
+        .term-title {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            color: var(--text-3);
+            letter-spacing: .02em;
+        }
+
+        .term-copy {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            height: 28px;
+            min-width: 28px;
+            padding: 0 8px;
+            border-radius: 6px;
+            background: transparent;
+            border: 1px solid var(--border);
+            cursor: pointer;
+            color: var(--text-3);
+            font-family: 'DM Sans', sans-serif;
+            font-size: 11px;
+            font-weight: 500;
+            white-space: nowrap;
+            transition: background 150ms, color 150ms, border-color 150ms;
+        }
+
+        .term-copy:hover {
+            background: var(--bg-hover);
+            color: var(--text);
+            border-color: var(--border-h);
+        }
+
+        .term-copy svg {
+            width: 13px;
+            height: 13px;
+            flex-shrink: 0;
+        }
+
+        .term-copy.copied svg {
+            animation: copyCheck 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+        }
+
+        @keyframes copyCheck {
+            0% { transform: scale(0); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .term-body {
+            padding: 18px 20px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            line-height: 1.8;
+            overflow-x: auto;
+        }
+
+        .term-line {
+            display: flex;
+            align-items: baseline;
+            gap: 10px;
+            white-space: nowrap;
+        }
+
+        .term-prompt {
+            color: var(--text-3);
+            user-select: none;
+            flex-shrink: 0;
+        }
+
+        .term-cmd {
+            color: var(--text);
+        }
+
+        .tc-k {
+            color: #818cf8;
+        }
+
+        .tc-s {
+            color: #7eb8f7;
+        }
+
+        .tc-f {
+            color: #fb923c;
+        }
+
+        @media (max-width: 640px) {
+            .getstarted {
+                padding-left: 20px;
+                padding-right: 20px;
+            }
+        }
+
+        /* ── CTA ── */
+        .cta {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+            padding: 90px 24px 110px;
+        }
+
+        .cta-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: clamp(28px, 4vw, 52px);
+            font-weight: 700;
+            letter-spacing: -.05em;
+            color: var(--text);
+            margin-bottom: 14px;
+        }
+
+        .cta-sub {
+            font-size: 15px;
+            color: var(--text-2);
+            margin-bottom: 36px;
+            line-height: 1.7;
+        }
+
+        /* ── FOOTER ── */
+        footer {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+            padding: 24px;
+            font-size: 12px;
+            color: var(--text-3);
+            font-family: 'DM Sans', sans-serif;
+            letter-spacing: .04em;
+        }
+
+        @media (max-width: 640px) {
+            .nav {
+                padding: 0 20px;
+            }
+
+            .hero {
+                padding: 96px 20px 64px;
+            }
+
+            .section,
+            .features {
+                padding-left: 20px;
+                padding-right: 20px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav class="nav">
+        <a href="#" class="nav-logo">Deep Black</a>
+        <div class="nav-links">
+            <a href="#features">Fonctionnalités</a>
+            <a href="#architecture">Architecture</a>
+            <a href="#get-started">Démarrage</a>
+        </div>
+        <button class="theme-btn" id="themeBtn" aria-label="Changer le thème">
+            <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+            </svg>
+            <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <circle cx="12" cy="12" r="5"></circle>
+                <line x1="12" y1="1" x2="12" y2="3"></line>
+                <line x1="12" y1="21" x2="12" y2="23"></line>
+                <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                <line x1="1" y1="12" x2="3" y2="12"></line>
+                <line x1="21" y1="12" x2="23" y2="12"></line>
+                <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+            </svg>
+        </button>
+    </nav>
+
+    <section class="hero">
+        <div class="hero-tag">Java 17, Maven, JavaFX</div>
+        <h1 class="hero-title">DEEP BLACK</h1>
+        <p class="hero-sub-title">Moteur d'échecs</p>
+        <div class="hero-tw"><span id="tw"></span><span class="cursor">|</span></div>
+        <div class="hero-actions">
+            <a href="documentation.html" class="btn btn-primary">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
+                    <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
+                </svg>
+                Documentation
+            </a>
+            <a href="#features" class="btn btn-outline">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polygon
+                        points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2">
+                    </polygon>
+                </svg>
+                Fonctionnalités
+            </a>
+            <a href="https://github.com/naaazim/Chess-AI" target="_blank" class="btn btn-outline">
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path
+                        d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z">
+                    </path>
+                </svg>
+                GitHub
+            </a>
+        </div>
+    </section>
+
+    <div class="ticker-wrap">
+        <div class="ticker-track" id="tickerTrack"></div>
+    </div>
+
+    <section class="features" id="features">
+        <p class="feat-eyebrow">Sous le capot</p>
+        <h2 class="feat-title">Une IA construite pour gagner</h2>
+        <div class="feat-grid">
+            <div class="feat-item">
+                <div class="feat-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                        <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
+                        <path d="M2 17l10 5 10-5"></path>
+                        <path d="M2 12l10 5 10-5"></path>
+                    </svg>
+                </div>
+                <div class="feat-item-title">Minimax Alpha-Bêta</div>
+                <div class="feat-item-desc">Algorithme de recherche récursif avec élagage alpha-bêta réduisant l'espace
+                    d'états de 99%. Approfondissement itératif (IDS) et fenêtres d'aspiration pour des coups de qualité
+                    à chaque instant.</div>
+            </div>
+            <div class="feat-item">
+                <div class="feat-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                        <ellipse cx="12" cy="5" rx="9" ry="3"></ellipse>
+                        <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path>
+                        <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path>
+                    </svg>
+                </div>
+                <div class="feat-item-title">Table de transposition Zobrist</div>
+                <div class="feat-item-desc">4 millions d'entrées indexées par hachage Zobrist 64 bits. Les positions
+                    déjà analysées sont retrouvées en O(1), évitant des millions de recalculs pendant la recherche.
+                </div>
+            </div>
+            <div class="feat-item">
+                <div class="feat-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                        <rect x="2" y="3" width="20" height="14" rx="2"></rect>
+                        <path d="M8 21h8M12 17v4"></path>
+                    </svg>
+                </div>
+                <div class="feat-item-title">Représentation bitboard</div>
+                <div class="feat-item-desc">12 entiers long Java (64 bits) encodent la position complète. Les opérations
+                    bit à bit permettent d'analyser 64 cases simultanément. Millions de positions par seconde.</div>
+            </div>
+            <div class="feat-item">
+                <div class="feat-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                        <circle cx="12" cy="12" r="3"></circle>
+                        <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
+                        <path d="M4.93 4.93a10 10 0 0 0 0 14.14"></path>
+                    </svg>
+                </div>
+                <div class="feat-item-title">Parallélisation multi-thread</div>
+                <div class="feat-item-desc">Chaque coup racine est évalué dans un thread indépendant via
+                    ExecutorService. Le moteur exploite tous les cœurs du processeur pour doubler la vitesse de
+                    recherche.</div>
+            </div>
+            <div class="feat-item">
+                <div class="feat-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                        <path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z"></path>
+                    </svg>
+                </div>
+                <div class="feat-item-title">Livre d'ouvertures</div>
+                <div class="feat-item-desc">Base de milliers d'ouvertures construite depuis des PGN de référence,
+                    indexée en binaire pour un accès O(1). Sécurité intégrée : tout coup dangereux est rejeté avant
+                    d'être joué.</div>
+            </div>
+            <div class="feat-item">
+                <div class="feat-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                    </svg>
+                </div>
+                <div class="feat-item-title">3 niveaux structurellement distincts</div>
+                <div class="feat-item-desc">FACILE, MOYEN, DIFFICILE ne diffèrent pas que par la profondeur. Chaque
+                    niveau a sa propre fonction d'évaluation, ses optimisations et son comportement algorithmique
+                    distinct.</div>
+            </div>
+        </div>
+    </section>
+
+    <div id="architecture" class="section">
+        <p class="section-eyebrow">Vue d'ensemble</p>
+        <h2 class="section-title">Architecture du projet</h2>
+        <div class="pkg-grid" id="pkgGrid"></div>
+    </div>
+
+    <!-- GET STARTED -->
+    <div class="getstarted" id="get-started">
+        <p class="section-eyebrow">Démarrage rapide</p>
+        <h2 class="section-title">Tester en local</h2>
+        <p class="gs-subtitle">Deux options : lancer directement le JAR fourni, ou recompiler depuis les sources avec
+            Maven.</p>
+
+        <div class="gs-step">
+            <div class="gs-step-label">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span class="gs-num">1</span> Cloner le dépôt
+                </div>
+            </div>
+            <div class="term" data-code="git clone https://github.com/naaazim/chess-ai.git
+cd chess-ai">
+                <div class="term-bar">
+                    <div class="term-dots">
+                        <div class="term-dot"></div>
+                        <div class="term-dot"></div>
+                        <div class="term-dot"></div>
+                    </div>
+                    <span class="term-title">terminal</span>
+                    <button class="term-copy" aria-label="Copier">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="9" y="9" width="13" height="13" rx="2"></rect>
+                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                        </svg>
+                    </button>
+                </div>
+                <div class="term-body">
+                    <div class="term-line"><span class="term-prompt">$</span><span class="term-cmd"><span
+                                class="tc-k">git</span> clone <span
+                                class="tc-s">https://github.com/naaazim/chess-ai.git</span></span></div>
+                    <div class="term-line"><span class="term-prompt">$</span><span class="term-cmd"><span
+                                class="tc-k">cd</span> chess-ai</span></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="gs-step">
+            <div class="gs-step-label">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span class="gs-num">2</span> Option A : Lancer le JAR pré compilé
+                </div>
+            </div>
+            <div class="term" data-code="java -jar target/chess-engine-1.0-SNAPSHOT.jar">
+                <div class="term-bar">
+                    <div class="term-dots">
+                        <div class="term-dot"></div>
+                        <div class="term-dot"></div>
+                        <div class="term-dot"></div>
+                    </div>
+                    <span class="term-title">terminal</span>
+                    <button class="term-copy" aria-label="Copier">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="9" y="9" width="13" height="13" rx="2"></rect>
+                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                        </svg>
+                    </button>
+                </div>
+                <div class="term-body">
+                    <div class="term-line"><span class="term-prompt">$</span><span class="term-cmd"><span
+                                class="tc-k">java</span> <span class="tc-f">-jar</span> <span
+                                class="tc-s">target/chess-engine-1.0-SNAPSHOT.jar</span></span></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="gs-or">ou</div>
+
+        <div class="gs-step">
+            <div class="gs-step-label">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span class="gs-num">2</span> Option B : Recompiler avec Maven
+                </div>
+                <span
+                    style="font-weight:400;letter-spacing:0;text-transform:none;font-size:10px;color:var(--text-3);padding:2px 8px;border:1px solid var(--border);border-radius:6px;white-space:nowrap;background:var(--bg-card);flex-shrink:0;">nécessite
+                    Maven 3.6+</span>
+            </div>
+            <div class="term" data-code="mvn clean package
+java -jar target/chess-engine-1.0-SNAPSHOT.jar">
+                <div class="term-bar">
+                    <div class="term-dots">
+                        <div class="term-dot"></div>
+                        <div class="term-dot"></div>
+                        <div class="term-dot"></div>
+                    </div>
+                    <span class="term-title">terminal</span>
+                    <button class="term-copy" aria-label="Copier">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="9" y="9" width="13" height="13" rx="2"></rect>
+                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                        </svg>
+                    </button>
+                </div>
+                <div class="term-body">
+                    <div class="term-line"><span class="term-prompt">$</span><span class="term-cmd"><span
+                                class="tc-k">mvn</span> clean package</span></div>
+                    <div class="term-line"><span class="term-prompt">$</span><span class="term-cmd"><span
+                                class="tc-k">java</span> <span class="tc-f">-jar</span> <span
+                                class="tc-s">target/chess-engine-1.0-SNAPSHOT.jar</span></span></div>
+                </div>
+            </div>
+        </div>
+
+        <div
+            style="margin-top:8px;padding:14px 18px;background:var(--bg-card);border:1px solid var(--border);border-radius:10px;font-size:13px;color:var(--text-2);line-height:1.7;">
+            <span
+                style="font-family:'Space Grotesk',sans-serif;font-weight:600;color:var(--text);font-size:12px;letter-spacing:.04em;">Prérequis
+                :</span>
+            &nbsp;Java JDK 17 ou supérieur. L'interface graphique nécessite JavaFX - inclus dans le JAR autonome.
+        </div>
+    </div>
+
+    <div class="cta">
+        <h2 class="cta-title">Prêt à explorer le code ?</h2>
+        <p class="cta-sub">58 classes, 8 packages, des centaines de décisions algorithmiques documentées.</p>
+        <a href="documentation.html" class="btn btn-primary" style="font-size:15px;padding:14px 30px">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:17px;height:17px">
+                <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
+                <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
+            </svg>
+            Ouvrir la documentation
+        </a>
+    </div>
+
+    <footer>DEEP BLACK, Intelligence Artificielle, Université Paris Cité, 2025 2026</footer>
+
+    <script>
+        /* ── NAVBAR SCROLL ── */
+        (function () {
+            var nav = document.querySelector('.nav');
+            function update() { nav.classList.toggle('scrolled', window.scrollY > 10); }
+            window.addEventListener('scroll', update, { passive: true });
+            update();
+        }());
+
+        /* ── COPY BUTTONS ── */
+        document.querySelectorAll('.term-copy').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                var term = btn.closest('.term');
+                var code = term.getAttribute('data-code') || '';
+
+                var onSuccess = function () {
+                    var svgOrig = btn.querySelector('svg').outerHTML;
+                    btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>';
+                    btn.classList.add('copied');
+                    setTimeout(function () {
+                        btn.classList.remove('copied');
+                        btn.innerHTML = svgOrig;
+                    }, 1800);
+                };
+
+                if (navigator.clipboard && window.isSecureContext) {
+                    navigator.clipboard.writeText(code).then(onSuccess);
+                } else {
+                    var textArea = document.createElement("textarea");
+                    textArea.value = code;
+                    textArea.style.position = "fixed";
+                    textArea.style.left = "-999999px";
+                    document.body.appendChild(textArea);
+                    textArea.focus();
+                    textArea.select();
+                    try {
+                        document.execCommand('copy');
+                        onSuccess();
+                    } catch (err) { }
+                    document.body.removeChild(textArea);
+                }
+            });
+        });
+
+        /* ── TICKER ── */
+        (function () {
+            var items = [
+                { num: '58', label: 'Classes Java' },
+                { num: '8', label: 'Packages' },
+                { num: '3', label: 'Niveaux IA' },
+                { num: '14', label: 'Profondeur max' },
+                { num: '5s', label: 'Temps / coup' },
+                { num: '4M', label: 'Entrées TT' },
+                { num: '64', label: 'Bits / bitboard' },
+                { num: '50', label: 'Parties / matchup' },
+                { num: '100', label: 'Centipions (pion)' },
+                { num: '900', label: 'Centipions (dame)' },
+            ];
+            var track = document.getElementById('tickerTrack');
+            [items, items].forEach(function (set) {
+                set.forEach(function (item) {
+                    var el = document.createElement('div');
+                    el.className = 'ticker-item';
+                    el.innerHTML =
+                        '<div class="ticker-num">' + item.num + '</div>' +
+                        '<div class="ticker-label">' + item.label + '</div>';
+                    track.appendChild(el);
+                });
+            });
+        }());
+
+        /* ── ARCHITECTURE CARDS ── */
+        (function () {
+            var PKGS = [
+                { id: 'plateau', role: 'Représentation bitboard, génération de coups, règles du jeu', count: 10 },
+                { id: 'ia', role: 'Orchestration IA, pipeline de décision, finales, IDS', count: 10 },
+                { id: 'ia-evaluation', role: "Sous-modules d'évaluation : matériel, PST, mobilité, sécurité du roi", count: 12 },
+                { id: 'ia-recherche', role: 'Alpha-Bêta, quiescence, table de transposition, tri MVV-LVA', count: 5 },
+                { id: 'ouverture', role: "Livre d'ouvertures binaire, parseur PGN, clé de position", count: 5 },
+                { id: 'jeu', role: 'Boucle de jeu console, abstraction joueurs humains et IA', count: 5 },
+                { id: 'tournoi', role: 'Tournoi automatique, sauvegarde incrémentale, reprise automatique', count: 4 },
+                { id: 'gui', role: 'Interface JavaFX : échiquier interactif, contrôleur MVC, notation SAN', count: 7 },
+            ];
+            var grid = document.getElementById('pkgGrid');
+            PKGS.forEach(function (p, i) {
+                var card = document.createElement('div');
+                card.className = 'pkg-card';
+                card.style.animationDelay = (i * 45) + 'ms';
+                card.innerHTML =
+                    '<div class="pkg-card-id">' + p.id + '</div>' +
+                    '<div class="pkg-card-role">' + p.role + '</div>' +
+                    '<div class="pkg-card-foot">' +
+                    '<span class="pkg-card-count">' + p.count + ' classe' + (p.count > 1 ? 's' : '') + '</span>' +
+                    '<svg class="pkg-card-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">' +
+                    '<line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></div>';
+                card.addEventListener('click', function () { window.location.href = 'documentation.html#' + p.id; });
+                grid.appendChild(card);
+            });
+        }());
+
+        /* ── TYPEWRITER ── */
+        (function () {
+            var phrases = [
+                'Minimax, Alpha Bêta, Quiescence, Iterative Deepening',
+                'Table de transposition Zobrist, Tri MVV LVA, 4M entrées',
+                'FACILE, MOYEN, DIFFICILE, trois architectures distinctes',
+                "Livre d'ouvertures, Finales KQK/KRK, Parallélisation",
+            ];
+            var el = document.getElementById('tw');
+            var i = 0, c = 0, erasing = false;
+            function tick() {
+                var p = phrases[i];
+                if (!erasing) {
+                    el.textContent = p.slice(0, ++c);
+                    if (c === p.length) { setTimeout(function () { erasing = true; tick(); }, 2200); return; }
+                    setTimeout(tick, 44);
+                } else {
+                    el.textContent = p.slice(0, --c);
+                    if (c === 0) { erasing = false; i = (i + 1) % phrases.length; setTimeout(tick, 60); return; }
+                    setTimeout(tick, 18);
+                }
+            }
+            setTimeout(tick, 900);
+        }());
+
+        /* ── THEME TOGGLE ── */
+        (function () {
+            var btn = document.getElementById('themeBtn');
+            var html = document.documentElement;
+            var style = document.createElement('style');
+            style.textContent = '::view-transition-old(root){z-index:1;animation:none;mix-blend-mode:normal}::view-transition-new(root){z-index:9999;animation:none;mix-blend-mode:normal}';
+            document.head.appendChild(style);
+            btn.addEventListener('click', function () {
+                var cur = html.getAttribute('data-theme');
+                var next = cur === 'dark' ? 'light' : 'dark';
+                var r = btn.getBoundingClientRect();
+                var x = Math.round(r.left + r.width / 2);
+                var y = Math.round(r.top + r.height / 2);
+                var radius = Math.ceil(Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y)));
+                if (document.startViewTransition) {
+                    var t = document.startViewTransition(function () {
+                        html.setAttribute('data-theme', next);
+                        localStorage.setItem('db-theme', next);
+                    });
+                    t.ready.then(function () {
+                        document.documentElement.animate(
+                            { clipPath: ['circle(0px at ' + x + 'px ' + y + 'px)', 'circle(' + radius + 'px at ' + x + 'px ' + y + 'px)'] },
+                            { duration: 600, easing: 'cubic-bezier(0.76,0,0.24,1)', pseudoElement: '::view-transition-new(root)' }
+                        );
+                    });
+                } else {
+                    html.setAttribute('data-theme', next);
+                    localStorage.setItem('db-theme', next);
+                }
+            });
+        }());
+    </script>
+
+</body>
+
+</html>

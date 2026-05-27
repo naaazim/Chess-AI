@@ -1,0 +1,351 @@
+/* style.css - Premium Chess GUI Theme */
+
+/* ========================================================================= */
+/* Global / Background                                                       */
+/* ========================================================================= */
+.root {
+    -fx-background-color: #0f0f0f;
+    -fx-font-family: "Segoe UI", "Helvetica Neue", "Arial", sans-serif;
+}
+
+/* Default text color for generic labels */
+.label {
+    -fx-text-fill: #e8e8e8;
+}
+
+/* ========================================================================= */
+/* Typography & Titles                                                       */
+/* ========================================================================= */
+.title-label {
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #ffffff;
+    /* Simulate margin-bottom */
+    -fx-padding: 0 0 8px 0;
+}
+
+/* ========================================================================= */
+/* Neutralize JavaFX Default Artifacts (Focus rings & extra backgrounds)     */
+/* ========================================================================= */
+.root:focused,
+.button:focused,
+.combo-box:focused,
+.radio-button:focused,
+.list-view:focused,
+.scroll-bar:focused {
+    -fx-focus-color: transparent;
+    -fx-faint-focus-color: transparent;
+}
+
+/* Specific exclusion of focus background color per user instruction */
+.list-view:focused {
+    -fx-background-color: transparent;
+}
+
+/* ========================================================================= */
+/* Layout Containers                                                         */
+/* ========================================================================= */
+.menu-container {
+    -fx-background-color: #1a1a1a;
+    -fx-background-radius: 12px;
+    -fx-padding: 32px;
+    -fx-border-color: #2a2a2a;
+    -fx-border-width: 1px;
+    -fx-border-radius: 12px;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.4), 20, 0, 0, 4);
+}
+
+.side-panel {
+    -fx-background-color: #1a1a1a;
+    -fx-background-radius: 8px;
+    -fx-border-color: #2a2a2a;
+    -fx-border-width: 1px;
+    -fx-border-radius: 8px;
+    -fx-padding: 16px;
+}
+
+.side-panel-title {
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #6b6b6b;
+    /* Simulate margin-bottom */
+    -fx-padding: 0 0 6px 0;
+}
+
+.board-container {
+    -fx-background-radius: 4px;
+    -fx-border-radius: 4px;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.6), 24, 0, 0, 0);
+}
+
+/* ========================================================================= */
+/* History List                                                              */
+/* ========================================================================= */
+.history-list {
+    -fx-background-color: #141414;
+    -fx-control-inner-background: #141414;
+    -fx-border-color: #2a2a2a;
+    -fx-border-width: 1px;
+    -fx-background-radius: 6px;
+    -fx-border-radius: 6px;
+}
+
+.history-list .list-cell {
+    -fx-background-color: #141414;
+    -fx-text-fill: #d0d0d0;
+    -fx-font-size: 12px;
+    -fx-padding: 4px 8px;
+    /* Suppression de la bordure de sélection colorée */
+    -fx-border-color: transparent;
+    -fx-border-width: 0;
+}
+
+.history-list .list-cell:hover {
+    -fx-background-color: #222222;
+}
+
+.history-list .list-cell:selected,
+.history-list .list-cell:filled:selected,
+.history-list .list-cell:filled:selected:focused {
+    -fx-background-color: #2a2a2a;
+    -fx-text-fill: #ffffff;
+}
+
+/* ========================================================================= */
+/* ScrollBar Support (for ListViews)                                         */
+/* ========================================================================= */
+.scroll-bar {
+    -fx-background-color: #1a1a1a;
+}
+
+.scroll-bar .thumb {
+    -fx-background-color: #3a3a3a;
+    -fx-background-radius: 4px;
+}
+
+.scroll-bar .increment-button,
+.scroll-bar .decrement-button {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+
+/* ========================================================================= */
+/* Buttons                                                                   */
+/* ========================================================================= */
+.button {
+    -fx-background-color: #2a2a2a;
+    -fx-text-fill: #e8e8e8;
+    -fx-font-size: 13px;
+    -fx-padding: 8px 16px;
+    -fx-background-radius: 6px;
+    -fx-border-color: #3a3a3a;
+    -fx-border-width: 1px;
+    -fx-border-radius: 6px;
+    -fx-cursor: hand;
+}
+
+.button:hover {
+    -fx-background-color: #3a3a3a;
+}
+
+.button:pressed {
+    -fx-background-color: #222222;
+}
+
+.button-accent {
+    -fx-background-color: #ffffff;
+    -fx-text-fill: #0f0f0f;
+    -fx-font-weight: bold;
+    -fx-background-radius: 6px;
+    -fx-border-color: transparent;
+}
+
+.button-accent:hover {
+    -fx-background-color: #e8e8e8;
+}
+
+/* ========================================================================= */
+/* Radio Buttons                                                             */
+/* ========================================================================= */
+.radio-button {
+    -fx-text-fill: #d0d0d0;
+    -fx-font-size: 13px;
+    -fx-cursor: hand;
+}
+
+.radio-button:selected {
+    -fx-text-fill: #ffffff;
+}
+
+.radio-button .radio {
+    -fx-background-color: transparent;
+    -fx-border-color: #3a3a3a;
+    -fx-border-width: 1px;
+    -fx-border-radius: 10px;
+    -fx-background-radius: 10px;
+}
+
+.radio-button:selected .radio .dot {
+    -fx-background-color: #ffffff;
+}
+
+/* ========================================================================= */
+/* ComboBox                                                                  */
+/* ========================================================================= */
+.combo-box {
+    -fx-background-color: #2a2a2a;
+    -fx-border-color: #3a3a3a;
+    -fx-border-width: 1px;
+    -fx-background-radius: 6px;
+    -fx-border-radius: 6px;
+    -fx-cursor: hand;
+}
+
+/* Ensures the text inside the unexpanded combobox is colored correctly */
+.combo-box > .list-cell {
+    -fx-text-fill: #e8e8e8;
+}
+
+.combo-box-popup .list-view {
+    -fx-background-color: #1a1a1a;
+    -fx-border-color: #2a2a2a;
+    -fx-border-width: 1px;
+}
+
+.combo-box-popup .list-view .list-cell {
+    -fx-background-color: transparent;
+    -fx-text-fill: #e8e8e8;
+}
+
+.combo-box-popup .list-view .list-cell:hover,
+.combo-box-popup .list-view .list-cell:filled:hover {
+    -fx-background-color: #2a2a2a;
+}
+
+/* ========================================================================= */
+/* Advantage / Board                                                         */
+/* ========================================================================= */
+.advantage-value {
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+}
+
+.advantage-white {
+    -fx-text-fill: #ffffff;
+}
+
+.advantage-black {
+    -fx-text-fill: #aaaaaa;
+}
+
+.advantage-even {
+    -fx-text-fill: #6b6b6b;
+}
+
+.coord-text {
+    -fx-font-size: 10px;
+    -fx-font-weight: bold;
+}
+
+.coord-dark {
+    -fx-fill: #779556;
+}
+
+.coord-light {
+    -fx-fill: #eceed1;
+}
+
+/* ========================================================================= */
+/* Mode cards (écran d'accueil)                                              */
+/* ========================================================================= */
+.mode-card {
+    -fx-background-color: #111111;
+    -fx-border-color: #1f1f1f;
+    -fx-border-width: 1px;
+    -fx-background-radius: 10px;
+    -fx-border-radius: 10px;
+    -fx-cursor: hand;
+}
+
+.mode-card:hover {
+    -fx-background-color: #181818;
+    -fx-border-color: #2a2a2a;
+}
+
+.mode-card.selected {
+    -fx-border-color: #ffffff;
+    -fx-border-width: 1px;
+}
+
+/* ========================================================================= */
+/* Level buttons (pill toggle)                                               */
+/* ========================================================================= */
+.level-btn {
+    -fx-background-color: #111111;
+    -fx-text-fill: #555555;
+    -fx-border-color: #1f1f1f;
+    -fx-border-width: 1px;
+    -fx-background-radius: 20px;
+    -fx-border-radius: 20px;
+    -fx-cursor: hand;
+    -fx-padding: 6px 16px;
+    -fx-font-size: 11px;
+}
+
+.level-btn:hover {
+    -fx-background-color: #1a1a1a;
+}
+
+.level-btn.active {
+    -fx-background-color: #ffffff;
+    -fx-text-fill: #000000;
+    -fx-border-color: #ffffff;
+}
+
+.level-btn.active:hover {
+    -fx-background-color: #e8e8e8;
+}
+
+/* ========================================================================= */
+/* Capture bar                                                               */
+/* ========================================================================= */
+.capture-bar {
+    -fx-min-height: 24px;
+    -fx-pref-height: 24px;
+    -fx-max-height: 24px;
+    -fx-spacing: 2px;
+    -fx-alignment: CENTER_LEFT;
+}
+
+/* ========================================================================= */
+/* Side panel section labels                                                 */
+/* ========================================================================= */
+.side-section-label {
+    -fx-font-size: 9px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #444444;
+    -fx-padding: 0 0 4px 0;
+}
+
+/* ========================================================================= */
+/* History cells (monospace, transparent background)                         */
+/* ========================================================================= */
+.history-cell .list-cell {
+    -fx-background-color: transparent;
+    -fx-text-fill: #bbbbbb;
+    -fx-font-size: 12px;
+    -fx-font-family: "Courier New", Monospaced, monospace;
+    -fx-border-color: transparent;
+    -fx-border-width: 0;
+}
+
+.history-cell .list-cell:hover {
+    -fx-background-color: #1a1a1a;
+}
+
+.history-cell .list-cell:selected,
+.history-cell .list-cell:filled:selected,
+.history-cell .list-cell:filled:selected:focused {
+    -fx-background-color: transparent;
+    -fx-text-fill: #ffffff;
+}
